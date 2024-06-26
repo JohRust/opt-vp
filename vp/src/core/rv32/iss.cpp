@@ -13,6 +13,7 @@
 #include <cstdlib>
 
 #include <chrono>
+//#include "fpga.h"
 
 using namespace rv32;
 
@@ -252,6 +253,12 @@ void ISS::exec_step() {
 		//printf("OP: %s\n", Opcode::mappingStr[op]);
 
 	switch (op) {
+
+		// custom instruction
+		//case Opcode::BCOEFF:
+		//	regs[instr.rd()] = binomialCoeff(regs[instr.rs1()],  regs[instr.rs2()]);
+		//	break;
+
 		case Opcode::UNDEF:
 			if (trace)
 				std::cout << "[ISS] WARNING: unknown instruction '" << std::to_string(instr.data()) << "' at address '"
