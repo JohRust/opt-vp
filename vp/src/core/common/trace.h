@@ -27,6 +27,8 @@
 
 // Opcode::Type getType(Opcode::Mapping mapping);
 
+inline bool record_traces = false; // Only collect traces if this variable is switched on
+
 enum class InstructionType {
 	UNKNOWN = 0,
 	Arithmetic,

@@ -156,67 +156,69 @@ void ISS::exec_step() {
 		pc += 4;
 	}
 
-	uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
+	if(record_traces){
+		uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
 
-	#ifdef USE_INDIVIDUAL_ARRAYS
-	last_executed_instructions[ring_buffer_index] = op;
-	last_registers[ring_buffer_index] = {RS1,RS2,RD};
-	//printf("Last regs:%d, %d -> %d\n", std::get<0>(last_registers[ring_buffer_index]), std::get<1>(last_registers[ring_buffer_index]), std::get<2>(last_registers[ring_buffer_index]));
-	last_executed_pc[ring_buffer_index] = pc;
-	last_cycles[ring_buffer_index] = cycles_diff;
-	#else
-		last_executed_steps[ring_buffer_index].last_executed_instruction = op;
-		last_executed_steps[ring_buffer_index].last_cycles = cycles_diff;
-		last_executed_steps[ring_buffer_index].last_registers = {RS1,RS2,RD};
-		last_executed_steps[ring_buffer_index].last_executed_pc = last_pc;
-		last_executed_steps[ring_buffer_index].last_powermode = 0; //TODO
-		last_executed_steps[ring_buffer_index].last_memory_read = 0;
-		last_executed_steps[ring_buffer_index].last_memory_written = 0;
-		// if(std::get<1>(last_memory_access)==AccessType::STORE){
-		// 	last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access);
-		// 	if(last_executed_steps[ring_buffer_index].last_memory_written==0){
-		// 		printf("ERROR ZERO write\n\n\n");
-		// 	}
-		// }else{
-		// 	if(std::get<1>(last_memory_access)==AccessType::LOAD)
-		// 	{
-		// 	   printf("LOAD: %s\n", Opcode::mappingStr[op]);
-		// 	   last_executed_steps[ring_buffer_index].last_memory_read = std::get<0>(last_memory_access);
-		// 	}
-			
-		// }
-		last_executed_steps[ring_buffer_index].last_step_id = total_num_instr;
-	#endif
+		#ifdef USE_INDIVIDUAL_ARRAYS
+		last_executed_instructions[ring_buffer_index] = op;
+		last_registers[ring_buffer_index] = {RS1,RS2,RD};
+		//printf("Last regs:%d, %d -> %d\n", std::get<0>(last_registers[ring_buffer_index]), std::get<1>(last_registers[ring_buffer_index]), std::get<2>(last_registers[ring_buffer_index]));
+		last_executed_pc[ring_buffer_index] = pc;
+		last_cycles[ring_buffer_index] = cycles_diff;
+		#else
+			last_executed_steps[ring_buffer_index].last_executed_instruction = op;
+			last_executed_steps[ring_buffer_index].last_cycles = cycles_diff;
+			last_executed_steps[ring_buffer_index].last_registers = {RS1,RS2,RD};
+			last_executed_steps[ring_buffer_index].last_executed_pc = last_pc;
+			last_executed_steps[ring_buffer_index].last_powermode = 0; //TODO
+			last_executed_steps[ring_buffer_index].last_memory_read = 0;
+			last_executed_steps[ring_buffer_index].last_memory_written = 0;
+			// if(std::get<1>(last_memory_access)==AccessType::STORE){
+			// 	last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access);
+			// 	if(last_executed_steps[ring_buffer_index].last_memory_written==0){
+			// 		printf("ERROR ZERO write\n\n\n");
+			// 	}
+			// }else{
+			// 	if(std::get<1>(last_memory_access)==AccessType::LOAD)
+			// 	{
+			// 	   printf("LOAD: %s\n", Opcode::mappingStr[op]);
+			// 	   last_executed_steps[ring_buffer_index].last_memory_read = std::get<0>(last_memory_access);
+			// 	}
+				
+			// }
+			last_executed_steps[ring_buffer_index].last_step_id = total_num_instr;
+		#endif
 
-	last_memory_access = {0, AccessType::NONE};//reset last memory access
-	//updating ringbuffer done
-	//update index
-	ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
+		last_memory_access = {0, AccessType::NONE};//reset last memory access
+		//updating ringbuffer done
+		//update index
+		ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
 
-	//insert into tree of oldest instruction, which will be overwritten in the next step
-	Opcode::Mapping oldest_op = last_executed_steps[ring_buffer_index].last_executed_instruction;
-	if(oldest_op){//ring buffer is still being filled if this is false
-		//check if a tree for this op already exists
-		InstructionNodeR* found_tree = NULL;
-		for (InstructionNodeR& root : instruction_trees){
-			
-			if(root.instruction == oldest_op){
-				found_tree = &root;
-				break;
+		//insert into tree of oldest instruction, which will be overwritten in the next step
+		Opcode::Mapping oldest_op = last_executed_steps[ring_buffer_index].last_executed_instruction;
+		if(oldest_op){//ring buffer is still being filled if this is false
+			//check if a tree for this op already exists
+			InstructionNodeR* found_tree = NULL;
+			for (InstructionNodeR& root : instruction_trees){
+				
+				if(root.instruction == oldest_op){
+					found_tree = &root;
+					break;
+				}
 			}
-		}
-		if(found_tree!=NULL){
-			//printf("-> %d\n",found_tree->instruction);
-		}else{
-			//printf("first occurance of op %d. Adding to list\n", oldest_op);
-			instruction_trees.emplace_back(oldest_op, 0);
-			found_tree = &instruction_trees.back();
-		}
-		//printf("found tree found or created for op %d", found_tree->instruction);
+			if(found_tree!=NULL){
+				//printf("-> %d\n",found_tree->instruction);
+			}else{
+				//printf("first occurance of op %d. Adding to list\n", oldest_op);
+				instruction_trees.emplace_back(oldest_op, 0);
+				found_tree = &instruction_trees.back();
+			}
+			//printf("found tree found or created for op %d", found_tree->instruction);
 
-		//insert ringbuffer - this opcode into tree
-		found_tree->insert_rb(last_executed_steps, 
-							ring_buffer_index);
+			//insert ringbuffer - this opcode into tree
+			found_tree->insert_rb(last_executed_steps, 
+								ring_buffer_index);
+		}
 	}
 
 	if (trace) {
@@ -1267,6 +1269,7 @@ void ISS::exec_step() {
             throw std::runtime_error("unknown opcode");
 	}
 
+	if (record_traces) {
 		if(std::get<1>(last_memory_access)==AccessType::STORE){
 			last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access);
 			if(last_executed_steps[ring_buffer_index].last_memory_written==0){
@@ -1280,7 +1283,7 @@ void ISS::exec_step() {
 			}
 			
 		}
-
+	}
 }
 
 uint64_t ISS::_compute_and_get_current_cycles() {
