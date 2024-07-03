@@ -393,9 +393,9 @@ class InstructionNode{
 			uint32_t result = 0;
 			for (size_t i = 0; i < INSTRUCTION_TREE_DEPTH; i++)
 			{
-			if(dependencies_true_[i]){
-				result++;
-			}
+				if(dependencies_true_[i]){
+					result++;
+				}
 			}
 			return result;
 		}

@@ -4,8 +4,14 @@
 #include "lib/json/single_include/nlohmann/json.hpp"
 
 
-std::string get_background_color(const char* instruction){
-	if (instruction[0] == 'B') {
+/**
+ * Returns the background color based on the given instruction.
+ *
+ * @param instruction The instruction to determine the background color for.
+ * @return The background color as a string in the format "R G B", where R, G, and B are floating-point values between 0 and 1.
+ */
+std::string get_background_color(std::string instruction){
+	if (instruction == "LB" || instruction == "LBU" || instruction == "LH" || instruction == "LHU" || instruction == "LW") {
 		return "0.35 .5 0.9";
 	}
 	return ".0 .0 1.0";
@@ -521,9 +527,8 @@ std::stringstream InstructionNodeR::to_dot(const char* tree_op_name, const char*
 		dot_stream << name.str(); 
 		float per_weight = (float)weight/(float)tree_weight;
 		uint16_t color_index = per_weight * 8 + 0.1 + 1; //9 colors (1-9) TODO configure rounding
-		
-		dot_stream 
-		<< "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\"> BGCOLOR=\"0.35 .5 0.9\""
+		dot_stream
+		<< "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" BGCOLOR=\"" << get_background_color(instruction_string) << "\">"
 		<< "<TR><TD><FONT COLOR=\"" << hue << " " << saturation << " " << value << "\">" 
 		<< label 
 		<< "</FONT></TD></TR>"
@@ -909,6 +914,11 @@ int InstructionNodeR::prune_tree(uint64_t weight_threshold, uint8_t depth){
 	return 0;
 }
 
+/**
+ * Retrieves the program counters (pcs) associated with the instruction node.
+ * 
+ * @return A map containing the program counters (pcs).
+ */
 std::map<uint64_t, int> InstructionNodeR::get_pc(){
 	std::map<uint64_t, int> pcs; 
 
@@ -964,7 +974,7 @@ std::stringstream InstructionNodeLeaf::to_dot(const char* tree_op_name, const ch
 			dot_stream << name.str(); 
 			float per_weight = (float)weight/(float)tree_weight;
 			uint16_t color_index = per_weight * 8 + 0.1 + 1; //9 colors (1-9) TODO configure rounding
-			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\">" 
+			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" BGCOLOR=\"" << get_background_color(instruction_string) << "\">"
 			<< "<TR><TD>" 
 			<< label 
 			<< "</TD></TR>" 
@@ -1006,7 +1016,7 @@ std::stringstream InstructionNodeLeaf::to_dot(const char* tree_op_name, const ch
 			dot_stream << name.str(); 
 			float per_weight = (float)weight/(float)tree_weight;
 			uint16_t color_index = 1; //9 colors (1-9) TODO configure rounding
-			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\">" 
+			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" BGCOLOR=\"" << get_background_color(instruction_string) << "\">"
 			<< "<TR><TD>" 
 			<< label 
 			<< "</TD></TR>" 
@@ -1122,7 +1132,7 @@ std::stringstream InstructionNodeMemory::to_dot(const char* tree_op_name, const 
 		dot_stream << name.str(); 
 		float per_weight = (float)weight/(float)tree_weight;
 		uint16_t color_index = per_weight * 8 + 0.1 + 1; //9 colors (1-9) TODO configure rounding
-		dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\">" 
+		dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" BGCOLOR=\"" << get_background_color(instruction_string) << "\">"
 		<< "<TR><TD>" 
 		<< label 
 		<< "</TD></TR>" 
@@ -1205,7 +1215,7 @@ std::stringstream InstructionNodeMemoryLeaf::to_dot(const char* tree_op_name, co
 			dot_stream << name.str(); 
 			float per_weight = (float)weight/(float)tree_weight;
 			uint16_t color_index = per_weight * 8 + 0.1 + 1; //9 colors (1-9) TODO configure rounding
-			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\">" 
+			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" BGCOLOR=\"" << get_background_color(instruction_string) << "\">"
 			<< "<TR><TD>" 
 			<< label 
 			<< "</TD></TR>" 
@@ -1250,7 +1260,7 @@ std::stringstream InstructionNodeMemoryLeaf::to_dot(const char* tree_op_name, co
 			dot_stream << name.str(); 
 			float per_weight = (float)weight/(float)tree_weight;
 			uint16_t color_index = 1; //9 colors (1-9) TODO configure rounding
-			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\">" 
+			dot_stream << "[label=<<TABLE BORDER=\"2\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" BGCOLOR=\"" << get_background_color(instruction_string) << "\">"
 			<< "<TR><TD>" 
 			<< label 
 			<< "</TD></TR>" 
