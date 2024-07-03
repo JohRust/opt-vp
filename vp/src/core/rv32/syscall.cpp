@@ -12,6 +12,8 @@
 #include <boost/lexical_cast.hpp>
 #include <optimizations.h>
 
+#include "trace.h"
+
 using namespace rv32;
 
 // see: riscv-gnu-toolchain/riscv-newlib/libgloss/riscv/
@@ -258,6 +260,14 @@ int SyscallHandler::execute_syscall(uint64_t n, uint64_t _a0, uint64_t _a1, uint
 			return 0;
 		case SYS_zero:
 			std::cout << "ZERO syscall" << std::endl;
+			return 0;
+
+		case SYS_traces:
+			if (_a0 == 0) {
+				record_traces = false;
+			} else {
+				record_traces = true;
+			}
 			return 0;
 
 		case SYS_custom1:
