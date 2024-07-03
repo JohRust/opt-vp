@@ -78,9 +78,9 @@ struct ScoreParams {
 	uint64_t weight; 
 	uint32_t length; 
 	float dep_score;
-	int32_t num_children;
-	int32_t inputs;
-	int32_t outputs; 
+	uint32_t num_children;
+	uint32_t inputs;
+	uint32_t outputs; 
 	float score_multiplier; 
 	float score_bonus; 
 // uint32_t num_pcs;
@@ -110,7 +110,7 @@ struct Path
 	float score_bonus = 0;
 	float score_multiplier = 1.0;
 
-	double inverse_dependency_score = 0.0;
+	float inverse_dependency_score = 0.0;
 	std::vector<uint64_t> path_hashes;
 	std::vector<Opcode::Mapping> opcodes;
 	InstructionNode* end_of_sequence;

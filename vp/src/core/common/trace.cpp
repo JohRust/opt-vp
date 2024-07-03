@@ -8,13 +8,13 @@
  * Returns the background color based on the given instruction.
  *
  * @param instruction The instruction to determine the background color for.
- * @return The background color as a string in the format "R G B", where R, G, and B are floating-point values between 0 and 1.
+ * @return The background color as a string in the format "Hue Saturation Value".
  */
 std::string get_background_color(std::string instruction){
 	if (instruction == "LB" || instruction == "LBU" || instruction == "LH" || instruction == "LHU" || instruction == "LW") {
-		return "0.35 .5 0.9";
+		return "0.35 .5 0.9"; // green
 	}
-	return ".0 .0 1.0";
+	return ".0 .0 1.0"; // white
 }
 
 using namespace Opcode;
