@@ -2,8 +2,7 @@
 #include <cstdint>
 #include <iostream>
 #include "ai_caller.h"
-
-extern "C" int make_syscall(int arg1, int arg2, int syscall_number);
+#include "syscall.h"
 
 void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, const std::vector<float>& newValues) {
 	// Replace values in the array based on the mask

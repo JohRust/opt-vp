@@ -1,6 +1,6 @@
 OBJECTS  = main.o bootstrap.o ai_accelerator.o ai_caller.o shap.o irq.o
-CFLAGS   = -march=rv32i -mabi=ilp32 -g
-CXXFLAGS = -march=rv32i -mabi=ilp32 -g
+CFLAGS   = -march=rv32im -mabi=ilp32 -g
+CXXFLAGS = -march=rv32im -mabi=ilp32 -g
 LDFLAGS  = -nostartfiles -Wl,--no-relax
 
 include ../../Makefile.common
