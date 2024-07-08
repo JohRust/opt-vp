@@ -3,7 +3,7 @@
 #include "nn/sequential.hpp"
 #include "nn/linear.hpp"
 #include "nn/relu.hpp"
-#include "tensor.hpp"
+#include "nn/tensor.hpp"
 
 void wait_nops(uint32_t nOps) {
 	for (uint32_t i = 0; i < nOps; i++) {
