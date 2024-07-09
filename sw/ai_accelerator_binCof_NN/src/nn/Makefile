@@ -1,11 +1,9 @@
-OBJECTS  = $(patsubst %.cpp, %.o,$(wildcard *.cpp)) $(patsubst %.c, %.o,$(wildcard *.c)) $(patsubst %.S, %.o,$(wildcard *.S))
+OBJECTS  = main.o tensor.o
 CFLAGS   = -march=rv32im -mabi=ilp32 -g
 CXXFLAGS = -march=rv32im -mabi=ilp32 -g
-LDFLAGS  = -nostartfiles -Wl,--no-relax
+LDFLAGS  = -Wl,--no-relax
 
-OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp))
-
-include ../../Makefile.common
+include ../../../Makefile.common
 override LD = $(CXX)
 
 # Make test target and run tests

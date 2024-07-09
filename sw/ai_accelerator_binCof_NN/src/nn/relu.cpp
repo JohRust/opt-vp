@@ -23,3 +23,5 @@ Tensor<T> nn::ReLU<T>::backward(const Tensor<T>& gradOutput) {
     Tensor gradInput(gradOutput_flat, input.getShape());
     return gradInput;
 }
+
+template class nn::ReLU<float>;

@@ -7,7 +7,7 @@
 
 void wait_nops(uint32_t nOps) {
 	for (uint32_t i = 0; i < nOps; i++) {
-		asm("nop");  // TODO correlate nOps to clocks/time waited
+		asm("nop");
 	}
 }
 

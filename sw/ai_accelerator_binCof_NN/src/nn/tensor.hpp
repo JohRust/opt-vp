@@ -91,7 +91,7 @@ class Tensor {
          * @param other The tensor to multiply with. 
          * @return The result of the matrix multiplication.
         */
-        Tensor<T> matmul(Tensor& other) const;
+        Tensor<T> matmul(const Tensor& other) const;
 
         /**
          * Multiplies the current tensor elementwise with another tensor.
@@ -99,7 +99,7 @@ class Tensor {
          * @param other The tensor to multiply with.
          * @return The resulting tensor after multiplication.
          */
-        Tensor<T> mul(Tensor& other) const;
+        Tensor<T> mul(const Tensor& other) const;
 
 
         /**

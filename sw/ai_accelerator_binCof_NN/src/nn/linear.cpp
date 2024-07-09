@@ -38,3 +38,5 @@ template <typename T>
 std::string nn::Linear<T>::toString() {
     return "Linear (" + std::to_string(weights.getShape()[0]) + " -> " + std::to_string(weights.getShape()[1]) + ")";
 }
+
+template class nn::Linear<float>;
