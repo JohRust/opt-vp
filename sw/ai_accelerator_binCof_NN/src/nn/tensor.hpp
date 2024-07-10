@@ -168,7 +168,7 @@ class Tensor {
          * @param indices The indices specifying the position of the element.
          * @return A reference to the element at the specified indices.
          */
-        const T& operator[](const std::vector<int>) const;
+        const T& at(const std::vector<int>) const;
 
         /**
          * @brief Accesses the element at the specified indices in the tensor. Read-only.
@@ -176,7 +176,9 @@ class Tensor {
          * @param indices The indices specifying the position of the element.
          * @return A reference to the element at the specified indices.
          */
-        T& operator[](const std::vector<int>);
+        T& at(const std::vector<int>);
+
+        Tensor<T> operator[](const std::vector<int> index) const;
 
         /**
          * Calculates the sum of the elements along the specified axis.
