@@ -32,7 +32,7 @@ class Tensor {
         Tensor(const Tensor& other);
 
         /**
-         * Creates a new Tensor object filled with zeros.
+         * @brief Creates a new Tensor object filled with zeros.
          *
          * @param shape The shape of the tensor.
          * @return A new Tensor object filled with zeros.
@@ -94,7 +94,7 @@ class Tensor {
         Tensor<T> matmul(const Tensor& other) const;
 
         /**
-         * Multiplies the current tensor elementwise with another tensor.
+         * @brief Multiplies the current tensor elementwise with another tensor.
          *
          * @param other The tensor to multiply with.
          * @return The resulting tensor after multiplication.
@@ -112,7 +112,7 @@ class Tensor {
         Tensor<T> operator*(const Tensor& other) const;
 
         /**
-         * Multiplies the tensor by a scalar value.
+         * @brief Multiplies the tensor by a scalar value.
          *
          * @tparam T The data type of the tensor.
          * @param scalar The scalar value to multiply the tensor by.
@@ -134,7 +134,7 @@ class Tensor {
         Tensor<T> operator+(const Tensor& other) const;
 
         /**
-         * Adds a scalar value to each element of the tensor.
+         * @brief Adds a scalar value to each element of the tensor.
          *
          * @param scalar The scalar value to be added.
          * @return A new tensor with the scalar added to each element.
@@ -155,7 +155,7 @@ class Tensor {
         Tensor<T> operator-(const Tensor& other) const;
 
         /**
-         * Substracts a scalar value to each element of the tensor.
+         * @brief Substracts a scalar value to each element of the tensor.
          *
          * @param scalar The scalar value to be substracted.
          * @return A new tensor with the scalar substracted from each element.
@@ -178,10 +178,16 @@ class Tensor {
          */
         T& at(const std::vector<int>);
 
+        /**
+         * @brief Overloaded subscript operator for accessing elements of the tensor using index.
+         * 
+         * @param index The index vector specifying the position of the element to access.
+         * @return Tensor<T> The tensor element at the specified index.
+         */
         Tensor<T> operator[](const std::vector<int> index) const;
 
         /**
-         * Calculates the sum of the elements along the specified axis.
+         * @brief Calculates the sum of the elements along the specified axis.
          *
          * @param axis The axis along which to calculate the sum.
          * @return A new Tensor object containing the sum of the elements along the specified axis.

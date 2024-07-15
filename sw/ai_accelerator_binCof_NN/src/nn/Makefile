@@ -1,4 +1,4 @@
-OBJECTS  = main.o tensor.o
+OBJECTS  = $(patsubst %.cpp, %.o,$(wildcard *.cpp)) $(patsubst %.c, %.o,$(wildcard *.c)) $(patsubst %.S, %.o,$(wildcard *.S))
 CFLAGS   = -march=rv32im -mabi=ilp32 -g
 CXXFLAGS = -march=rv32im -mabi=ilp32 -g
 LDFLAGS  = -Wl,--no-relax

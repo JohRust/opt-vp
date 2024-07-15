@@ -1,8 +1,9 @@
-#include "tensor.hpp"
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+
+#include "tensor.hpp"
 
 template <typename T>
 Tensor<T>::Tensor() : data(std::vector<T>()), shape(std::vector<int>()) {
@@ -15,7 +16,7 @@ Tensor<T>::Tensor(std::vector<T> data, std::vector<int> shape) : data(data), sha
         n_data *= s;
     }
     if (data.size() != n_data) {
-        throw std::invalid_argument("Data size does not match tensor size");
+        throw std::invalid_argument("Creating Tensor failed. Data size does not match tensor size: " + std::to_string(data.size()) + " != " + std::to_string(n_data));
     }
 }
 
@@ -27,7 +28,7 @@ Tensor<T>::Tensor(const Tensor<T>& other) {
 
 template <typename T>
 Tensor<T> Tensor<T>::zeros(std::vector<int> shape) {
-    uint32_t n_data = 0;
+    uint32_t n_data = 1;
     for (auto s : shape) {
         n_data *= s;
     }
@@ -88,8 +89,12 @@ template <typename T>
 Tensor<T> Tensor<T>::matmul(const Tensor<T>& other) const {
     std::vector<T> other_data = other.getData();
     std::vector<int> other_shape = other.getShape();
+    if (shape.size() != 2 || other_shape.size() != 2) {
+        throw std::invalid_argument("Can only multiply 2D tensors");
+    }
     if (shape[1] != other_shape[0]) {
-        throw std::invalid_argument("Matrix dimensions do not match");
+        std::string desc = "Matrix dimensions do not match for multiplication: ";
+        throw std::invalid_argument(desc + std::to_string(shape[1]) + " != " + std::to_string(other_shape[0]));
     }
     std::vector<T> result_data;
     std::vector<int> result_shape = {shape[0], other_shape[1]};
@@ -110,7 +115,7 @@ Tensor<T> Tensor<T>::mul(const Tensor<T>& other) const{
     std::vector<T> other_data = other.getData();
     std::vector<int> other_shape = other.getShape();
     if (shape != other_shape) {
-        throw std::invalid_argument("Tensor shapes do not match");
+        throw std::invalid_argument("Tensor shapes do not match for elementwise multiplication");
     }
     std::vector<T> result_data;
     for (int i = 0; i < data.size(); i++) {
@@ -137,14 +142,43 @@ template <typename T>
 Tensor<T> Tensor<T>::add(const Tensor<T>& other) const {
     std::vector<T> other_data = other.getData();
     std::vector<int> other_shape = other.getShape();
-    if (shape != other_shape) {
-        throw std::invalid_argument("Tensor shapes do not match");
-    }
     std::vector<T> result_data;
-    for (int i = 0; i < data.size(); i++) {
-        result_data.push_back(data[i] + other_data[i]);
+    std::vector<int> result_shape;
+    if (shape.size() == other_shape.size()){ 
+        for (int i = 0; i < data.size(); i++) {
+            result_data.push_back(data[i] + other_data[i]);
+        }
+        result_shape = shape;
     }
-    return Tensor(result_data, shape);
+    else if (shape.size() == 1 && other_shape.size() == 0) {
+        for (int i = 0; i < data.size(); i++) {
+            result_data.push_back(data[i] + other_data[0]);
+        }
+        result_shape = shape;
+    }
+    else if (shape.size() == 0 && other_shape.size() == 1) {
+        for (int i = 0; i < other_data.size(); i++) {
+            result_data.push_back(data[0] + other_data[i]);
+        }
+        result_shape = other_shape;
+    }
+    else if (shape.size() == 1 && other_shape.size() == 2 && shape[0] == other_shape[1]) {
+        for (int i = 0; i < data.size(); i++) {
+            result_data.push_back(data[i] + other_data[i % other_data.size()]);
+        }
+        result_shape = other_shape;
+    }
+    else if (shape.size() == 2 && other_shape.size() == 1 && shape[1] == other_shape[0]) {
+        for (int i = 0; i < data.size(); i++) {
+            result_data.push_back(data[i] + other_data[i % other_data.size()]);
+        }
+        result_shape = shape;
+    }
+    else {
+        throw std::invalid_argument("Tensor shapes do not match for addition: " 
+            + std::to_string(shape.size()) + " != " + std::to_string(other_shape.size()));
+    }
+    return Tensor(result_data, result_shape);
 }
 
 template <typename T>

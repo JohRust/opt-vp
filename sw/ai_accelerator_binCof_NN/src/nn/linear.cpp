@@ -11,8 +11,8 @@ nn::Linear<T>::Linear(int inputSize, int outputSize) {
 
 template <typename T>
 Tensor<T> nn::Linear<T>::forward(const Tensor<T>& input) {
-    auto weights_t = weights.transpose();
-    Tensor<T> temp = input.matmul(weights_t) + biases;
+    Tensor<T> temp = input.matmul(weights.transpose());
+    temp = temp + biases;
     this->input = input;
     return temp;
 }
