@@ -294,6 +294,15 @@ Tensor<T> Tensor<T>::sum(const int axis) const {
 }
 
 template <typename T>
+T Tensor<T>::sum() const {
+    T sum = 0;
+    for (int i = 0; i < data.size(); i++) {
+        sum += data[i];
+    }
+    return sum;
+}
+
+template <typename T>
 T Tensor<T>::item() const {
     if (data.size() != 1) {
         throw std::invalid_argument("Tensor does not have exactly one element");

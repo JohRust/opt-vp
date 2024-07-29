@@ -194,6 +194,12 @@ class Tensor {
          */
         Tensor<T> sum(const int axis) const;
 
+        /**
+         * Calculates the sum of all elements in the tensor.
+         *
+         * @return The sum of all elements in the tensor.
+         */
+        T sum() const;
 
         /**
          * @brief Returns the only element in the tensor.
