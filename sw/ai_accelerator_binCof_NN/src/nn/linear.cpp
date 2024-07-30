@@ -22,9 +22,9 @@ Tensor<T> nn::Linear<T>::forward(const Tensor<T>& input) {
 template <typename T>
 Tensor<T> nn::Linear<T>::backward(const Tensor<T>& gradOutput) {
     std::cout << gradOutput.toString() << std::endl;
-    std::cout << weights.toString() << std::endl;
-    auto gradInput = gradOutput.matmul(weights.transpose());
-    std::cout << gradInput.toString() << std::endl;
+    std::cout << "weights:\n" << weights.toString() << std::endl;
+    auto gradInput = gradOutput.matmul(weights);
+    std::cout << "gradInput:\n" << gradInput.toString() << std::endl;
     auto gradWeights = gradOutput.transpose().matmul(input).transpose();
     std::cout << gradWeights.toString() << std::endl;
     auto gradBiases = gradOutput.sum(0);

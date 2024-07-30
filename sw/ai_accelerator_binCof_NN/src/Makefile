@@ -3,7 +3,7 @@ CFLAGS   = -march=rv32im -mabi=ilp32 -g
 CXXFLAGS = -march=rv32im -mabi=ilp32 -g
 LDFLAGS  = -nostartfiles -Wl,--no-relax
 
-OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp))
+OBJECTS += $(patsubst %.cpp, %.o, $(wildcard nn/*.cpp))
 
 include ../../Makefile.common
 override LD = $(CXX)

@@ -5,7 +5,6 @@
 #include "module.hpp"
 #include "linear.hpp"
 #include "sequential.hpp"
-#include "loss.hpp"
 
 template class Tensor<float>;
 
