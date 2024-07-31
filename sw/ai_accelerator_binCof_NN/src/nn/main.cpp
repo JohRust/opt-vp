@@ -21,6 +21,8 @@ int main() {
         Tensor res = model.forward(t);
         std::cout << res.toString() << std::endl;
         //return 0;
+
+        std::cout << Tensor<float>({0,1,3,3,11,5}, {2, 3}).sum(1).toString() << std::endl;
     }
     std::cout << "______________________" << std::endl;
     {
@@ -33,16 +35,17 @@ int main() {
             {4, 2});
         Tensor<float> y_train({3.5, 6.5, 9.5, 12.5}, {4, 1});
         auto lin = nn::Linear<float>(2, 1);
-        for (int i = 0; i < 1000; i++) {
-            std::cout << "Iteration: " << i << std::endl;
+        lin.setBiases(Tensor<float>({0.9}, {1}));
+        //lin.setWeights(Tensor<float>({0.5, 1.1}, {1, 2}));
+        for (int i = 0; i < 100; i++) {
             auto y_pred = lin.forward(x_train);
             auto loss = y_pred - y_train;
-            loss = loss * loss; // squared error
-            std::cout << "Loss: " << loss.toString() << std::endl;
+            //loss = loss * loss; // squared error
+            std::cout << "Loss: " << loss.sum() << std::endl;
             auto grad = lin.backward(loss);
-            lin.update(0.01);
+            lin.update(0.001);
             if (i % 100 == 0) {
-                std::cout << "Loss: " << loss.sum() << std::endl;
+                std::cout << "Loss at iteration " << i << ": " << loss.sum() << std::endl;
             }
         }
     }

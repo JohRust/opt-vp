@@ -283,12 +283,22 @@ Tensor<T> Tensor<T>::sum(const int axis) const {
     std::vector<T> result_data;
     std::vector<int> result_shape = shape;
     result_shape.erase(result_shape.begin() + axis);
-    for (int i = 0; i < shape[axis]; i++) {
-        T sum = 0;
-        for (int j = 0; j < data.size(); j += shape[axis]) {
-            sum += data[j + i];
+    int size_after_axis = 1;
+    for (int i = axis; i < result_shape.size(); i++) {
+        size_after_axis *= result_shape[i];
+    }
+    int size_before_axis = 1;
+    for (int i = 0; i < axis; i++) {
+        size_before_axis *= result_shape[i];
+    }
+    for (int i = 0; i < size_before_axis; i++) {
+        for (int j = 0; j < size_after_axis; j++) {
+            T sum = 0;
+            for (int k = 0; k < shape[axis]; k++) {
+                sum += data[i * size_after_axis * shape[axis] + k * size_after_axis + j];
+            }
+            result_data.push_back(sum);
         }
-        result_data.push_back(sum);
     }
     return Tensor(result_data, result_shape);
 }
