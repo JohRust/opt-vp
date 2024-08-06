@@ -5,6 +5,7 @@
 #include "module.hpp"
 #include "linear.hpp"
 #include "sequential.hpp"
+#include "loss.hpp"
 
 template class Tensor<float>;
 
@@ -33,20 +34,20 @@ int main() {
             5, 6,
             7, 8},
             {4, 2});
-        Tensor<float> y_train({3.5, 6.5, 9.5, 12.5}, {4, 1});
-        auto lin = nn::Linear<float>(2, 1);
-        lin.setBiases(Tensor<float>({0.9}, {1}));
-        //lin.setWeights(Tensor<float>({0.5, 1.1}, {1, 2}));
-        for (int i = 0; i < 100; i++) {
-            auto y_pred = lin.forward(x_train);
-            auto loss = y_pred - y_train;
-            //loss = loss * loss; // squared error
-            std::cout << "Loss: " << loss.sum() << std::endl;
-            auto grad = lin.backward(loss);
-            lin.update(0.001);
-            if (i % 100 == 0) {
-                std::cout << "Loss at iteration " << i << ": " << loss.sum() << std::endl;
-            }
+        Tensor<float> y_train({3.5, 6.5, 12.5, 15.5}, {4, 1});
+        auto seq = nn::Sequential();
+        seq.addLayer(new nn::Linear<float>(2, 5));
+        seq.addLayer(new nn::ReLU<float>());
+        seq.addLayer(new nn::Linear<float>(5, 1));
+        auto criterion = nn::MSE<float>();
+        for (int i = 0; i < 10; i++) {
+            auto y_pred = seq.forward(x_train);
+            auto loss = criterion.forward(y_pred, y_train);
+
+            std::cout << "Loss at iteration " << i << ": " << loss.sum() << std::endl;
+            auto loss_grad = criterion.backward();
+            auto grad = seq.backward(loss_grad);
+            seq.update(0.01);
         }
     }
 }
