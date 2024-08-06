@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <cmath>
+#include <random>
 
 #include "tensor.hpp"
 
@@ -33,6 +35,22 @@ Tensor<T> Tensor<T>::zeros(std::vector<int> shape) {
         n_data *= s;
     }
     return Tensor<T>(std::vector<T>(n_data, 0.0), shape);
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::normal(std::vector<int> shape, T mean, T std) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> dist(mean, std);
+    uint32_t n_data = 1;
+    for (auto s : shape) {
+        n_data *= s;
+    }
+    std::vector<T> data;
+    for (int i = 0; i < n_data; i++) {
+        data.push_back(dist(gen));
+    }
+    return Tensor<T>(data, shape);
 }
 
 template <typename T>

@@ -40,6 +40,16 @@ class Tensor {
         static Tensor<T> zeros(std::vector<int> shape);
 
         /**
+         * @brief Creates a new Tensor object with values sampled from a normal distribution.
+         * 
+         * @param shape The shape of the tensor.
+         * @param mean The mean of the normal distribution.
+         * @param std The standard deviation of the normal distribution.
+         * @return A new Tensor object with values sampled from a normal distribution.
+         */
+        static Tensor<T> normal(std::vector<int> shape, T mean = 0, T std = 1);
+
+        /**
          * @brief Retrieves the data stored in the tensor.
          * 
          * @return A vector containing the data of the tensor.
