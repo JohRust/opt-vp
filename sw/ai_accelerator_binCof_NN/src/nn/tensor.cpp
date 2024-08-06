@@ -242,6 +242,15 @@ Tensor<T> Tensor<T>::operator-(T scalar) const {
 }
 
 template <typename T>
+Tensor<T> Tensor<T>::pow(const T exponent) const {
+    std::vector<T> result_data;
+    for (int i = 0; i < data.size(); i++) {
+        result_data.push_back(std::pow(data[i], exponent));
+    }
+    return Tensor(result_data, shape);
+}
+
+template <typename T>
 Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
     if (index.size() > shape.size()) {
         throw std::invalid_argument("Index dimensions do not match tensor dimensions");

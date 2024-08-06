@@ -173,6 +173,14 @@ class Tensor {
         Tensor<T> operator-(const T scalar) const;
 
         /**
+         * @brief Raises each element of the tensor to the power of the specified exponent.
+         *
+         * @param exponent The exponent to raise each element to.
+         * @return A new tensor with each element raised to the specified exponent.
+         */
+        Tensor<T> pow(const T exponent) const;
+
+        /**
          * @brief Accesses the element at the specified indices in the tensor.
          *
          * @param indices The indices specifying the position of the element.
