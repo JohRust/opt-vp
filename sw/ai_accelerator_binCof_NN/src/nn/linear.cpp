@@ -36,8 +36,8 @@ Tensor<T> nn::Linear<T>::backward(const Tensor<T>& gradOutput) {
 
 template <typename T>
 void nn::Linear<T>::update(double learningRate) {
-    weights = weights - gradWeights * learningRate;
-    biases = biases - gradBiases * learningRate;
+    this->weights = this->weights - this->gradWeights * learningRate;
+    this->biases = this->biases - this->gradBiases * learningRate;
 }
 
 template <typename T>
