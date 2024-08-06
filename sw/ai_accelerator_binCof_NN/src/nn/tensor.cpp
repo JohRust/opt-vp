@@ -364,15 +364,16 @@ std::string Tensor<T>::toString() const {
         }
         result += "]";
     } else {
-        result = "Tensor with shape (";
-        for (int s = 0; s < shape.size(); s++) {
-            result += std::to_string(shape[s]);
-            if (s < shape.size() - 1) {
-                result += ",";
-            }
-        }
-        result += ")";
+        result = "Tensor with shape";
     }
+    result += " (";
+    for (int s = 0; s < shape.size(); s++) {
+        result += std::to_string(shape[s]);
+        if (s < shape.size() - 1) {
+            result += ",";
+        }
+    }
+    result += ")";
     return result;
 }
 
