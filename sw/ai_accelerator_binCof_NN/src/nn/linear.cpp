@@ -22,7 +22,7 @@ Tensor<T> nn::Linear<T>::forward(const Tensor<T>& input) {
 template <typename T>
 Tensor<T> nn::Linear<T>::backward(const Tensor<T>& gradOutput) {
     auto gradInput = gradOutput.matmul(weights);
-    auto gradWeights = gradOutput.transpose().matmul(input);
+    auto gradWeights = input.transpose().matmul(gradOutput);
     auto gradBiases = gradOutput.sum(0);
     #define LIN_DEBUG
     #ifdef LIN_DEBUG
@@ -34,6 +34,7 @@ Tensor<T> nn::Linear<T>::backward(const Tensor<T>& gradOutput) {
     std::cout << "gradweights:\n" << gradWeights.toString() << std::endl;
     std::cout << "gradBiases:\n" << gradBiases.toString() << std::endl;
     #endif
+    //std::cout << "weights:\n" << weights.toString() << "\nbias:\n" << biases.toString() << std::endl;
     this->gradWeights = gradWeights;
     this->gradBiases = gradBiases;
     return gradInput;
@@ -41,13 +42,13 @@ Tensor<T> nn::Linear<T>::backward(const Tensor<T>& gradOutput) {
 
 template <typename T>
 void nn::Linear<T>::update(double learningRate) {
-    this->weights = this->weights - this->gradWeights * learningRate;
-    this->biases = this->biases - this->gradBiases * learningRate;
+    this->weights = this->weights + this->gradWeights * learningRate;
+    this->biases = this->biases + this->gradBiases * learningRate;
 }
 
 template <typename T>
 std::string nn::Linear<T>::toString() {
-    return "Linear (" + std::to_string(weights.getShape()[0]) + " -> " + std::to_string(weights.getShape()[1]) + ")";
+   return "Linear (" + std::to_string(weights.getShape()[0]) + " -> " + std::to_string(weights.getShape()[1]) + ")";
 }
 
 template <typename T>

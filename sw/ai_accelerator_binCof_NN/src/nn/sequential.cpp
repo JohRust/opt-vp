@@ -1,4 +1,5 @@
 #include "sequential.hpp"
+#include <iostream>
 
 namespace nn
 {
@@ -21,6 +22,7 @@ namespace nn
         for (auto layer : layers)
         {
             output = layer->forward(output);
+            //std::cout << output.toString() << std::endl;
         }
         return output;
     }
