@@ -131,6 +131,14 @@ class Tensor {
         Tensor<T> operator*(const T scalar) const;
 
         /**
+         * @brief perform an element-wise division.
+         * 
+         * @param other The tensor to divide with. 
+         * @return The result of the element-wise division.
+        */
+        Tensor<T> operator/(const T scalar) const;
+
+        /**
          * @brief perform an element-wise addition.
          * 
          * @param other The tensor to add with. 
@@ -218,6 +226,21 @@ class Tensor {
          * @return The sum of all elements in the tensor.
          */
         T sum() const;
+
+        /**
+         * Calculates the mean of the tensor along the specified axis.
+         *
+         * @param axis The axis along which to calculate the mean.
+         * @return A new tensor containing the mean values along the specified axis.
+         */
+        Tensor<T> mean(const int axis) const;
+
+        /**
+         * Calculates the mean of all elements in the tensor.
+         *
+         * @return The mean of all elements in the tensor.
+         */
+        T mean() const;
 
         /**
          * @brief Returns the only element in the tensor.

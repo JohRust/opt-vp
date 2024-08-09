@@ -157,6 +157,15 @@ Tensor<T> Tensor<T>::operator*(const T scalar) const {
 }
 
 template <typename T>
+Tensor<T> Tensor<T>::operator/(const T scalar) const {
+    std::vector<T> result_data;
+    for (int i = 0; i < data.size(); i++) {
+        result_data.push_back(data[i] / scalar);
+    }
+    return Tensor(result_data, shape);
+}
+
+template <typename T>
 Tensor<T> Tensor<T>::add(const Tensor<T>& other) const {
     std::vector<T> other_data = other.getData();
     std::vector<int> other_shape = other.getShape();
@@ -337,6 +346,20 @@ T Tensor<T>::sum() const {
         sum += data[i];
     }
     return sum;
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::mean(const int axis) const {
+    if (axis >= shape.size()) {
+        throw std::invalid_argument("Axis out of bounds");
+    }
+    Tensor<T> sum = this->sum(axis)/shape[axis];
+    return sum;
+}
+
+template <typename T>
+T Tensor<T>::mean() const {
+    return sum()/data.size();
 }
 
 template <typename T>

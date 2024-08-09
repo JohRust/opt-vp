@@ -10,7 +10,7 @@ namespace nn {
         Tensor<T> forward(const Tensor<T>& y_pred, const Tensor<T>& y_true) {
             this->y_pred = y_pred;
             this->y_true = y_true;
-            return (y_true - y_pred).pow(2).sum(0);
+            return (y_true - y_pred).pow(2).mean(0);
         }
 
         Tensor<T> backward() {
