@@ -59,6 +59,8 @@ namespace nn
          */
         std::string toString() override;
 
+        std::string getName() override { return "Sequential"; }
+
     private:
         std::vector<Module<float>*> layers; /**< The vector of layers in the sequential model. */
     };

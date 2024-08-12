@@ -57,5 +57,13 @@ namespace nn
          * @return The string representation of the object.
          */
         virtual std::string toString() = 0;
+
+        /**
+         * @brief Returns the name of the module.
+         * Other than toString this only returns a name, not a longer description.
+         * 
+         * @return The name of the module.
+         */
+        virtual std::string getName() = 0;
     };
 } // namespace nn

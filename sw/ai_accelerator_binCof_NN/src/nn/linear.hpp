@@ -12,6 +12,7 @@ namespace nn{
         Tensor<T> backward(const Tensor<T>& gradOutput) override;
         void update(double learningRate) override;
         std::string toString() override;
+        std::string getName() override { return "Linear"; }
         void setWeights(Tensor<float> weights);
         void setBiases(Tensor<float> biases);
 
