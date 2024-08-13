@@ -409,5 +409,35 @@ std::string Tensor<T>::toString() const {
     return result;
 }
 
+template <typename T>
+void Tensor<T>::serialize(FILE* file) const {
+    //Header
+    int rank = shape.size();
+    int n_data = data.size();
+    fwrite(&rank, sizeof(int), 1, file); // Write rank
+    fwrite(&n_data, sizeof(int), 1, file); // Write number of elements
+    //Body
+    fwrite(shape.data(), sizeof(int), shape.size(), file);
+    fwrite(data.data(), sizeof(T), data.size(), file);
+    fclose(file);
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::deserialize(FILE* file) {
+    //Header
+    int rank;
+    int n_data;
+    fread(&rank, sizeof(int), 1, file);
+    fread(&n_data, sizeof(int), 1, file);
+    //Body
+    std::vector<int> shape(rank);
+    fread(shape.data(), sizeof(int), rank, file);
+    std::vector<T> data(n_data);
+    fread(data.data(), sizeof(T), n_data, file);
+    fclose(file);
+    return Tensor<T>(data, shape);
+}
+
+
 template class Tensor<float>;
 template class Tensor<int>;

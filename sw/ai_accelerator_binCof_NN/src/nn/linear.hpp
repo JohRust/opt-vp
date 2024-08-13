@@ -15,7 +15,8 @@ namespace nn{
         std::string getName() override { return "Linear"; }
         void setWeights(Tensor<float> weights);
         void setBiases(Tensor<float> biases);
-
+        void serialize(FILE* file) const override;
+        void deserialize(FILE* file) override;
     private:
         Tensor<float> weights;
         Tensor<float> biases;

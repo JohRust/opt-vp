@@ -5,6 +5,7 @@
 
 namespace nn
 {
+    template <typename T>
     /**
      * @class Sequential
      * @brief Represents a sequential neural network model.
@@ -12,7 +13,7 @@ namespace nn
      * The Sequential class is responsible for managing a sequence of layers in a neural network model.
      * It provides methods for adding layers, performing forward and backward passes, and updating the model's parameters.
      */
-    class Sequential : public Module<float>{
+    class Sequential : public Module<T>{
     public:
         /**
          * @brief Destructor for the Sequential class.
@@ -27,7 +28,7 @@ namespace nn
          * 
          * @param module A pointer to the layer to be added.
          */
-        void addLayer(Module<float>* module);
+        void addLayer(Module<T>* module);
 
         /**
          * @brief Performs a forward pass through the sequential model.
@@ -35,7 +36,7 @@ namespace nn
          * @param input The input tensor to the model.
          * @return The output tensor after the forward pass.
          */
-        Tensor<float> forward(const Tensor<float>& input) override;
+        Tensor<T> forward(const Tensor<T>& input) override;
 
         /**
          * @brief Performs a backward pass through the sequential model.
@@ -43,7 +44,7 @@ namespace nn
          * @param gradOutput The gradient of the loss function with respect to the model's output.
          * @return The gradient of the loss function with respect to the model's input.
          */
-        Tensor<float> backward(const Tensor<float>& gradOutput) override;
+        Tensor<T> backward(const Tensor<T>& gradOutput) override;
 
         /**
          * @brief Updates the model's parameters using the specified learning rate.
@@ -61,7 +62,10 @@ namespace nn
 
         std::string getName() override { return "Sequential"; }
 
+        void serialize(FILE* file) const override;
+        void deserialize(FILE* file) override;
+
     private:
-        std::vector<Module<float>*> layers; /**< The vector of layers in the sequential model. */
+        std::vector<Module<T>*> layers; /**< The vector of layers in the sequential model. */
     };
 } // namespace nn

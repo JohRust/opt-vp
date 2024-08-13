@@ -257,6 +257,21 @@ class Tensor {
          */
         std::string toString() const;
 
+        /**
+         * @brief Serializes the tensor to a binary file.
+         * 
+         * @param file The file to save the tensor to.
+         */
+        void serialize(FILE* file) const;
+
+        /**
+         * @brief Loads a tensor from a binary file.
+         * 
+         * @param file The file to load the tensor from.
+         * @return A new tensor loaded from the file.
+         */
+        static Tensor<T> deserialize(FILE* file);
+
     private:
         std::vector<T> data;
         std::vector<int> shape;

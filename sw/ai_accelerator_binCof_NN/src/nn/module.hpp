@@ -65,5 +65,23 @@ namespace nn
          * @return The name of the module.
          */
         virtual std::string getName() = 0;
+
+        /**
+         * @brief Saves the module to a binary file.
+         * 
+         * This method saves the module to a binary file.
+         * 
+         * @param file The file to save the module to.
+         */
+        virtual void serialize(FILE* file) const = 0;
+
+        /**
+         * @brief Loads the module from a binary file.
+         * 
+         * This method loads the module from a binary file.
+         * 
+         * @param file The file to load the module from.
+         */
+        virtual void deserialize(FILE* file) = 0;
     };
 } // namespace nn

@@ -11,6 +11,8 @@ namespace nn{
         void update(double learningRate) override {} // No update needed for ReLU as it is not learnable
         std::string toString() override { return "ReLU"; }
         std::string getName() override { return "ReLU"; }
+        virtual void serialize(FILE* file) const override {};
+        virtual void deserialize(FILE* file) override {};
     private:
         Tensor<T> input;
     };

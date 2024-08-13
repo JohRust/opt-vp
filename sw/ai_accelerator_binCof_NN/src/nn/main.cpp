@@ -13,7 +13,7 @@ int main() {
     {
         auto t = Tensor<float>(std::vector<float>({1, 2, 3, 4, 5, 6, 7, 8, 9,
                                                 11,12,13,14,15,16,17,18,19}), std::vector<int>({2,9}));
-        auto model = nn::Sequential();
+        auto model = nn::Sequential<float>();
         auto lin = new nn::Linear<float>(9, 1);
         lin->setWeights(Tensor<float>(std::vector<float>({0, 0, -1, 0, 1, 0, 0, 0, 0}), std::vector<int>({1,9})));
         lin->setBiases(Tensor<float>(std::vector<float>({1}), std::vector<int>({1})));
@@ -57,13 +57,13 @@ int main() {
         //Tensor<float> x_train({0,2,4},{3,1});
         //Tensor<float> y_train({3, 6, 9},{3,1}); // W = [3.0, 0] b = 0
         //Tensor<float> y_train({1, 7, 13},{3,1}); // W = [3.0, 0] b = 1
-        auto seq = nn::Sequential();
+        auto seq = nn::Sequential<float>();
         seq.addLayer(new nn::Linear<float>(1, 5));
         seq.addLayer(new nn::ReLU<float>());
         seq.addLayer(new nn::Linear<float>(5, 1));
         auto criterion = nn::MSE<float>();
         float learning_rate = 0.001;
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 5; i++) {
             auto y_pred = seq.forward(x_train);
             std::cout << "\ny_pred: " << y_pred.toString() << std::endl;
             auto loss = criterion.forward(y_pred, y_train);

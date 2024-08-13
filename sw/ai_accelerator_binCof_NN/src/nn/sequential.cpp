@@ -1,9 +1,13 @@
 #include "sequential.hpp"
 #include <iostream>
 
+#include "linear.hpp"
+#include "relu.hpp"
+
 namespace nn
 {
-    Sequential::~Sequential()
+    template <typename T>
+    Sequential<T>::~Sequential()
     {
         for (auto layer : layers)
         {
@@ -11,14 +15,16 @@ namespace nn
         }
     }
 
-    void Sequential::addLayer(Module<float>* module)
+    template <typename T>
+    void Sequential<T>::addLayer(Module<T>* module)
     {
         layers.push_back(module);
     }
 
-    Tensor<float> Sequential::forward(const Tensor<float>& input)
+    template <typename T>
+    Tensor<T> Sequential<T>::forward(const Tensor<T>& input)
     {
-        Tensor<float> output = input;
+        Tensor<T> output = input;
         for (auto layer : layers)
         {
             output = layer->forward(output);
@@ -27,9 +33,10 @@ namespace nn
         return output;
     }
 
-    Tensor<float> Sequential::backward(const Tensor<float>& gradOutput)
+    template <typename T>
+    Tensor<T> Sequential<T>::backward(const Tensor<T>& gradOutput)
     {
-        Tensor<float> gradInput = gradOutput;
+        Tensor<T> gradInput = gradOutput;
         for (int i = layers.size() - 1; i >= 0; i--)
         {
             gradInput = layers[i]->backward(gradInput);
@@ -37,7 +44,8 @@ namespace nn
         return gradInput;
     }
 
-    void Sequential::update(double learningRate)
+    template <typename T>
+    void Sequential<T>::update(double learningRate)
     {
         for (auto layer : layers)
         {
@@ -45,7 +53,8 @@ namespace nn
         }
     }
 
-    std::string Sequential::toString()
+    template <typename T>
+    std::string Sequential<T>::toString()
     {
         std::string str = "Sequential(\n";
         for (auto layer : layers)
@@ -56,4 +65,40 @@ namespace nn
         return str;
     }
 
+    template <typename T>
+    void Sequential<T>::serialize(FILE* file) const
+    {
+        for (auto layer : layers)
+        {
+            //Write the name of the layer
+            fwrite(layer->getName().c_str(), sizeof(char), layer->getName().size()+1, file);
+            layer->serialize(file);
+        }
+    }
+
+    template <typename T>
+    void Sequential<T>::deserialize(FILE* file)
+    {
+        layers.clear();
+        //Read the name of the layer by reading until the null character
+        char name[100];
+        fread(name, sizeof(char), 100, file);
+        std::string layerName(name); //Automatically stops at the null character
+        if (layerName == "Linear")
+        {
+            Linear<T>* layer = new Linear<T>(0, 0);
+            layer->deserialize(file);
+            layers.push_back(layer);
+        }
+        else if (layerName == "ReLU")
+        {
+            ReLU<T>* layer = new ReLU<T>();
+            layer->deserialize(file);
+            layers.push_back(layer);
+        }
+    }
+
 } // namespace nn
+
+// Explicit instantiation of the Sequential class for the supported data types
+template class nn::Sequential<float>;

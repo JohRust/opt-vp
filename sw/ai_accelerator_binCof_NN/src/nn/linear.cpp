@@ -67,4 +67,16 @@ void nn::Linear<T>::setBiases(Tensor<float> biases) {
     this->biases = biases;
 }
 
+template <typename T>
+void nn::Linear<T>::serialize(FILE* file) const {
+    weights.serialize(file);
+    biases.serialize(file);
+}
+
+template <typename T>
+void nn::Linear<T>::deserialize(FILE* file) {
+    weights = Tensor<T>::deserialize(file);
+    biases = Tensor<T>::deserialize(file);
+}
+
 template class nn::Linear<float>;
