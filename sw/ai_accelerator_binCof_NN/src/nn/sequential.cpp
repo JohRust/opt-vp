@@ -82,7 +82,14 @@ namespace nn
         layers.clear();
         //Read the name of the layer by reading until the null character
         char name[100];
-        fread(name, sizeof(char), 100, file);
+        for (int i = 0; i < 100; i++)
+        {
+            fread(&name[i], sizeof(char), 1, file);
+            if (name[i] == '\0')
+            {
+                break;
+            }
+        }
         std::string layerName(name); //Automatically stops at the null character
         if (layerName == "Linear")
         {
@@ -93,8 +100,12 @@ namespace nn
         else if (layerName == "ReLU")
         {
             ReLU<T>* layer = new ReLU<T>();
-            layer->deserialize(file);
+            layer->deserialize(file); //Does nothing for ReLU
             layers.push_back(layer);
+        }
+        else
+        {
+            std::cerr << "Unknown layer type: " << layerName << std::endl;
         }
     }
 
