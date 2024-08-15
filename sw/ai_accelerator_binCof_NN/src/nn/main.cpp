@@ -26,22 +26,23 @@ int main() {
         */
 
         auto model = nn::Sequential<float>();
-        auto lin = new nn::Linear<float>(2, 5);
-        lin->setWeights(Tensor<float>(std::vector<float>({1,2,3,4,5,6,7,8,9,10}), std::vector<int>({5,2})));
+        auto lin = new nn::Linear<float>(2, 1);
+        lin->setWeights(Tensor<float>(std::vector<float>({1.0, 0.5}), std::vector<int>({1, 2})));
         model.addLayer(lin);
         model.addLayer(new nn::ReLU<float>());
+        std::cout << model.toString() << std::endl;
         //Open file
         FILE* file = fopen("model.bin", "wb");
         model.serialize(file);
         fclose(file);
-        auto pred1 = model.forward(Tensor<float>(std::vector<float>({1, 2}), std::vector<int>({2, 1})));
-        delete &model;
+        auto pred1 = model.forward(Tensor<float>(std::vector<float>({1, 2}), std::vector<int>({1, 2})));
 
         model = nn::Sequential<float>();
         file = fopen("model.bin", "rb");
-        model.deserialize(file);
+        model.deserialize(file); //Fails here
         fclose(file);
-        auto pred2 = model.forward(Tensor<float>(std::vector<float>({1, 2}), std::vector<int>({2, 1})));
+        std::cout << model.toString() << std::endl;
+        auto pred2 = model.forward(Tensor<float>(std::vector<float>({1, 2}), std::vector<int>({1, 2})));
         std::cout << "Pred1: " << pred1.toString() << std::endl;
         std::cout << "Pred2: " << pred2.toString() << std::endl;
     }

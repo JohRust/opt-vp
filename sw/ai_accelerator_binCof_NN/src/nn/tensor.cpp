@@ -419,7 +419,6 @@ void Tensor<T>::serialize(FILE* file) const {
     //Body
     fwrite(shape.data(), sizeof(int), shape.size(), file);
     fwrite(data.data(), sizeof(T), data.size(), file);
-    fclose(file);
 }
 
 template <typename T>
@@ -434,7 +433,6 @@ Tensor<T> Tensor<T>::deserialize(FILE* file) {
     fread(shape.data(), sizeof(int), rank, file);
     std::vector<T> data(n_data);
     fread(data.data(), sizeof(T), n_data, file);
-    fclose(file);
     return Tensor<T>(data, shape);
 }
 

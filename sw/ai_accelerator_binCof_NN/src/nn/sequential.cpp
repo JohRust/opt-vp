@@ -94,7 +94,7 @@ namespace nn
         if (layerName == "Linear")
         {
             Linear<T>* layer = new Linear<T>(0, 0);
-            layer->deserialize(file);
+            layer->deserialize(file); //Issue here
             layers.push_back(layer);
         }
         else if (layerName == "ReLU")
