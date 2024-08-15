@@ -86,7 +86,8 @@ int main() {
         seq.addLayer(new nn::Linear<float>(5, 1));
         auto criterion = nn::MSE<float>();
         float learning_rate = 0.001;
-        for (int i = 0; i < 5; i++) {
+        int epochs = 5;
+        for (int i = 0; i < epochs; i++) {
             auto y_pred = seq.forward(x_train);
             std::cout << "\ny_pred: " << y_pred.toString() << std::endl;
             auto loss = criterion.forward(y_pred, y_train);

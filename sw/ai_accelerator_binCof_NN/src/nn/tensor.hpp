@@ -259,6 +259,11 @@ class Tensor {
 
         /**
          * @brief Serializes the tensor to a binary file.
+         * The format is as follows:
+         * 1. The rank of the tensor (int)
+         * 2. The number of elements in the tensor (int)
+         * 3. The shape of the tensor (int[]) with the size of the rank
+         * 4. The data of the tensor (T[]) with the size of the number of elements
          * 
          * @param file The file to save the tensor to.
          */
@@ -266,6 +271,7 @@ class Tensor {
 
         /**
          * @brief Loads a tensor from a binary file.
+         * Assumes the file is in the format described in the serialize() method.
          * 
          * @param file The file to load the tensor from.
          * @return A new tensor loaded from the file.
