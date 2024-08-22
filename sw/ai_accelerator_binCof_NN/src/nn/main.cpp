@@ -11,40 +11,9 @@ template class Tensor<float>;
 
 int main() {
     {
-        /*
         auto t = Tensor<float>(std::vector<float>({1, 2, 3, 4, 5, 6, 7, 8, 9,
                                                 11,12,13,14,15,16,17,18,19}), std::vector<int>({2,9}));
-        auto model = nn::Sequential<float>();
-        auto lin = new nn::Linear<float>(9, 1);
-        lin->setWeights(Tensor<float>(std::vector<float>({0, 0, -1, 0, 1, 0, 0, 0, 0}), std::vector<int>({1,9})));
-        lin->setBiases(Tensor<float>(std::vector<float>({1}), std::vector<int>({1})));
-        model.addLayer(lin);
-        model.addLayer(new nn::ReLU<float>());
-        Tensor res = model.forward(t);
-        std::cout << res.toString() << std::endl;
-        std::cout << Tensor<float>({0,1,3,3,11,5}, {2, 3}).sum(1).toString() << std::endl;
-        */
-
-        auto model = nn::Sequential<float>();
-        auto lin = new nn::Linear<float>(2, 1);
-        lin->setWeights(Tensor<float>(std::vector<float>({1.0, 0.5}), std::vector<int>({1, 2})));
-        model.addLayer(lin);
-        model.addLayer(new nn::ReLU<float>());
-        std::cout << model.toString() << std::endl;
-        //Open file
-        FILE* file = fopen("model.bin", "wb");
-        model.serialize(file);
-        fclose(file);
-        auto pred1 = model.forward(Tensor<float>(std::vector<float>({1, 2}), std::vector<int>({1, 2})));
-
-        model = nn::Sequential<float>();
-        file = fopen("model.bin", "rb");
-        model.deserialize(file); //Fails here
-        fclose(file);
-        std::cout << model.toString() << std::endl;
-        auto pred2 = model.forward(Tensor<float>(std::vector<float>({1, 2}), std::vector<int>({1, 2})));
-        std::cout << "Pred1: " << pred1.toString() << std::endl;
-        std::cout << "Pred2: " << pred2.toString() << std::endl;
+        std::cout << "Tensor: " << t[{0}].toString() << std::endl;
     }
     std::cout << "______________________" << std::endl;
     {
