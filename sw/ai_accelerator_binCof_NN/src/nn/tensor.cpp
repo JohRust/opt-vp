@@ -286,6 +286,11 @@ Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
 }
 
 template <typename T>
+Tensor<T> Tensor<T>::operator[](const int index) const {
+    return (*this)[std::vector<int>({index})];
+}
+
+template <typename T>
 const T& Tensor<T>::at(const std::vector<int> index) const {
     if (index.size() != shape.size()) {
         throw std::invalid_argument("Index dimensions do not match tensor dimensions");

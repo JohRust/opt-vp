@@ -213,6 +213,14 @@ class Tensor {
         Tensor<T> operator[](const std::vector<int> index) const;
 
         /**
+         * @brief Overloaded subscript operator for accessing elements of the tensor using index.
+         * 
+         * @param index The index specifying the position of the element to access.
+         * @return Tensor<T> The tensor element at the specified index.
+         */
+        Tensor<T> operator[](const int index) const;
+
+        /**
          * @brief Calculates the sum of the elements along the specified axis.
          *
          * @param axis The axis along which to calculate the sum.
