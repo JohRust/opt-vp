@@ -5,7 +5,6 @@
 #include "stdio.h"
 #include "string.h"
 #include "unistd.h"
-#include "nn/sequential.hpp"
 
 // Some random coefficients for the linear regression model
 static float COEFFS[4] = {1.2, 3.4, 5.6, 7.8};
@@ -36,13 +35,3 @@ void wait_nops(uint32_t nOps);
  * @return The predicted output value.
  */
 float predict(const float *input_data, unsigned int size, unsigned int delay);
-
-/**
- * @brief Builds and returns a neural network model.
- * 
- * This function constructs and returns a neural network model using the nn::Sequential class.
- * The model can be used for various machine learning tasks.
- * 
- * @return The constructed neural network model.
- */
-nn::Sequential build_model();

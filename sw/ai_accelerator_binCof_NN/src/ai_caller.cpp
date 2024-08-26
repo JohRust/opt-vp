@@ -46,14 +46,6 @@ float reqPrediction(const float *input_data, unsigned int input_size) {
 	return predict(input_data, input_size, 0);
 }
 
-float reqPrediction_nn(const float *input_data, unsigned int input_size) {
-	std::vector<float> input_data_vec(input_data, input_data + input_size);
-	auto model = build_model();
-	Tensor<float> input_tensor(input_data_vec, {1, (int)input_size});
-	Tensor<float> output_tensor = model.forward(input_tensor);
-	return output_tensor.item();
-}
-
 float reqPrediction_dummy(const float *input_data, unsigned int input_size) {
 	// {}
 	if (input_data[0] == 0 && input_data[1] == 0 && input_data[2] == 0) {

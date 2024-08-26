@@ -12,13 +12,33 @@ Tensor<T>::Tensor() : data(std::vector<T>()), shape(std::vector<int>()) {
 }
 
 template <typename T>
-Tensor<T>::Tensor(std::vector<T> data, std::vector<int> shape) : data(data), shape(shape) {
+Tensor<T>::Tensor(std::vector<T>& data, std::vector<int>& shape) : data(data), shape(shape) {
     uint32_t n_data = 1;
     for (auto s : shape) {
         n_data *= s;
     }
     if (data.size() != n_data) {
         throw std::invalid_argument("Creating Tensor failed. Data size does not match tensor size: " + std::to_string(data.size()) + " != " + std::to_string(n_data));
+    }
+}
+
+template <typename T>
+Tensor<T>::Tensor(std::vector<T>& data) : data(data) {
+    shape = std::vector<int>({static_cast<int>(data.size())});
+}
+
+template <typename T>
+Tensor<T>::Tensor(std::vector<std::vector<T>>& data) {
+    shape = std::vector<int>({static_cast<int>(data.size()), static_cast<int>(data[0].size())});
+    for (int i = 1; i < data.size(); i++) {
+        if (data[i].size() != data[0].size()) {
+            throw std::invalid_argument("Creating Tensor failed. Data rows have different sizes");
+        }
+    }
+    for (int i = 0; i < data.size(); i++) {
+        for (int j = 0; j < data[0].size(); j++) {
+            this->data.push_back(data[i][j]);
+        }
     }
 }
 

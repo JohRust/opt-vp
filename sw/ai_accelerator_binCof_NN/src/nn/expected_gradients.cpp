@@ -1,9 +1,14 @@
 #include "expected_gradients.hpp"
 
 #include <random>
+#include <vector>
+#include <stdexcept>
 
 #include "module.hpp"
 #include "tensor.hpp"
+extern "C" {
+	#include "../syscall.h"
+}
 
 template <typename T>
 Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &background_dataset, int n_samples) {
@@ -57,8 +62,7 @@ void replaceValues(Tensor<T> array, const std::vector<bool> &mask, const std::ve
 }
 
 uint32_t binomialCoeff(uint32_t n, uint32_t k) {
-// Calculate the binomial coefficient
-#define BINCOEFF_SYSCALL
+//#define BINCOEFF_SYSCALL
 #ifndef BINCOEFF_SYSCALL
 	if (k > n - k) {
 		k = n - k;
@@ -137,14 +141,14 @@ Tensor<T> explainPrediction(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &b
 					subsetSize++;
 				}
 			}
-			Tensor<T> data_masked(input_data);
+			Tensor<T> data_masked(input);
 			auto sampled_background = sampleFromData(background_dataset);
 			replaceValues(data_masked, mask, sampled_background);
 
 			auto pred_without_i = model.forward(data_masked);
 
 			for (int i = 0; i < data_masked.getShape()[0]; ++i) {
-				data_masked.at({i, feat_i}) = input_data[i][feat_i];
+				data_masked.at({i, feat_i}) = input[i][feat_i];
 			}
 			auto pred_with_i = model.forward(data_masked);
 

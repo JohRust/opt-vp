@@ -21,7 +21,23 @@ class Tensor {
          * @param data A vector containing the data to be stored in the tensor.
          * @param shape A vector of integers representing the shape of the tensor.
          */
-        Tensor(std::vector<T> data, std::vector<int> shape);
+        Tensor(std::vector<T>& data, std::vector<int>& shape);
+
+        /**
+         * @brief Constructor for the Tensor class.
+         * Creates a 1D tensor from a vector.
+         * 
+         * @param data A vector of vectors containing the data to be stored in the tensor.
+         */
+        Tensor(std::vector<T>& data);
+
+        /**
+         * @brief Constructor for the Tensor class.
+         * Creates a 2D tensor from a vector of vectors.
+         * 
+         * @param data A vector of vectors containing the data to be stored in the tensor.
+         */
+        Tensor(std::vector<std::vector<T>>& data);
 
         /**
          * @brief Copy constructor for the Tensor class.
