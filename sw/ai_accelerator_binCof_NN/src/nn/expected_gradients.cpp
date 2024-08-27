@@ -32,7 +32,8 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		Tensor<T> random_sample = background_dataset[random_index];
 		Tensor<T> input_minus_random = input - random_sample;
 		Tensor<T> pred_current = module.forward(random_sample + (input_minus_random * alpha));
-		Tensor<T> current_grad = module.backward(pred_current - input_pred);
+		//Tensor<T> current_grad = module.backward(pred_current - input_pred);  // I think this is incorrect
+		Tensor<T> current_grad = module.backward(pred_current); // This should be right. See https://www.tensorflow.org/tutorials/interpretability/integrated_gradients#compute_gradients
 		grads += input_minus_random.mul(current_grad);
 	}
 	grads /= n_samples;

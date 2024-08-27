@@ -1,5 +1,7 @@
 #pragma once
 
+#include "nn/module.hpp"
+#include "nn/tensor.hpp"
 
 /**
  * @brief Requests a predictions for the input data using a linear regression model.
@@ -21,7 +23,7 @@ float reqPrediction(const float *input_data, unsigned int input_size);
  */
 float reqPredictionFPGA(const float *input_data, unsigned int input_size);
 
-float reqPredictionNN(const float *input_data, unsigned int input_size);
+float reqPredictionNN(const Tensor<float> &input_data, const nn::Module<float> &model, bool return_grads = false);
 
 /** Simulates a prediction function like the example from Wikipedia for testing purposes:
  * https://de.wikipedia.org/wiki/Shapley-Wert#Beispiel

@@ -4,8 +4,6 @@
 extern "C" {
 	#include "irq.h"
 }
-#include "nn/sequential.hpp"
-#include "nn/tensor.hpp"
 
 static volatile uint32_t * const DMA_SRC_ADDR  = (uint32_t * const)0x70000000;
 static volatile uint32_t * const DMA_DST_ADDR  = (uint32_t * const)0x70000004;
@@ -17,6 +15,8 @@ static const uint32_t DMA_OP_NOP = 0;
 static const uint32_t DMA_OP_MEMCPY = 1;
 
 volatile bool prediction_done = false;
+
+nn::Module PREDICTION_MODEL;
 
 float reqPredictionFPGA(const float *input_data, unsigned int input_size) {
 	float pred = predict(input_data, input_size, 0);
@@ -44,6 +44,13 @@ void init_dma() {
 
 float reqPrediction(const float *input_data, unsigned int input_size) {
 	return predict(input_data, input_size, 0);
+}
+
+float reqPredictionNN(const Tensor<float> &input_data, const nn::Module<float> &model, bool return_grads) {
+	auto output = model.forward(input_data);
+	if (return_grads) {
+		output.backwards();
+	}
 }
 
 float reqPrediction_dummy(const float *input_data, unsigned int input_size) {

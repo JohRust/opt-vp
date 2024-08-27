@@ -12,7 +12,7 @@ Tensor<T>::Tensor() : data(std::vector<T>()), shape(std::vector<int>()) {
 }
 
 template <typename T>
-Tensor<T>::Tensor(std::vector<T>& data, std::vector<int>& shape) : data(data), shape(shape) {
+Tensor<T>::Tensor(std::vector<T> data, std::vector<int> shape) : data(data), shape(shape) {
     uint32_t n_data = 1;
     for (auto s : shape) {
         n_data *= s;
@@ -23,12 +23,12 @@ Tensor<T>::Tensor(std::vector<T>& data, std::vector<int>& shape) : data(data), s
 }
 
 template <typename T>
-Tensor<T>::Tensor(std::vector<T>& data) : data(data) {
+Tensor<T>::Tensor(std::vector<T> data) : data(data) {
     shape = std::vector<int>({static_cast<int>(data.size())});
 }
 
 template <typename T>
-Tensor<T>::Tensor(std::vector<std::vector<T>>& data) {
+Tensor<T>::Tensor(std::vector<std::vector<T>> data) {
     shape = std::vector<int>({static_cast<int>(data.size()), static_cast<int>(data[0].size())});
     for (int i = 1; i < data.size(); i++) {
         if (data[i].size() != data[0].size()) {
