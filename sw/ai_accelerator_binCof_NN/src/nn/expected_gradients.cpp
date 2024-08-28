@@ -69,7 +69,7 @@ uint32_t binomialCoeff(uint32_t n, uint32_t k) {
 		k = n - k;
 	}
 	uint32_t res = 1;
-	for (uint32_t i = 0; i < k; ++i) {  // tested
+	for (uint32_t i = 0; i < k; ++i) {
 		res *= (n - i);
 		res /= (i + 1);
 	}
@@ -83,7 +83,7 @@ uint32_t binomialCoeff(uint32_t n, uint32_t k) {
 uint64_t factorial(uint64_t n) {
 	// Factorials larger than 20 cause overflow
 	if (n > 20)
-		return -1;
+		throw std::invalid_argument("Factorial of numbers greater than 20 is not supported as it causes overflow");
 
 	uint64_t res = 1;
 	for (uint32_t i = 1; i <= n; ++i) {

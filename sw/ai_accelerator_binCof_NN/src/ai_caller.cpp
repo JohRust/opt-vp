@@ -18,6 +18,14 @@ volatile bool prediction_done = false;
 
 nn::Module PREDICTION_MODEL;
 
+void dma_irq_handler() {
+	prediction_done = true;
+}
+
+void init_dma() {
+	register_interrupt_handler(4, dma_irq_handler);
+}
+
 float reqPredictionFPGA(const float *input_data, unsigned int input_size) {
 	float pred = predict(input_data, input_size, 0);
 	// Imagine that the prediction is done on a parallel hardware accelerator
@@ -34,23 +42,16 @@ float reqPredictionFPGA(const float *input_data, unsigned int input_size) {
 	return pred_in_memory;
 }
 
-void dma_irq_handler() {
-	prediction_done = true;
-}
-
-void init_dma() {
-	register_interrupt_handler(4, dma_irq_handler);
-}
-
 float reqPrediction(const float *input_data, unsigned int input_size) {
 	return predict(input_data, input_size, 0);
 }
 
-float reqPredictionNN(const Tensor<float> &input_data, const nn::Module<float> &model, bool return_grads) {
+float reqPredictionNN(const Tensor<float> &input_data, nn::Module<float> &model, bool return_grads) {
 	auto output = model.forward(input_data);
 	if (return_grads) {
-		output.backwards();
+		model.backward(output);
 	}
+	return output[0].item(); // TODO
 }
 
 float reqPrediction_dummy(const float *input_data, unsigned int input_size) {
