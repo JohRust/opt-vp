@@ -1,7 +1,6 @@
 #include <vector>
-#include "stdio.h"
-#include "unistd.h"
-#include "shap.h"
+#include <iostream>
+#include "nn/expected_gradients.hpp"
 #include "ai_caller.h"
 #include "syscall.h"
 #include "nn/tensor.hpp"
@@ -21,12 +20,9 @@ int main(int argc, char **argv) {
 		2.5, 3.0, 3.5}, {3, 4});
 	START_TRACE;
 	//std::vector<float> shapley_values = explainPrediction(input_data, reqPredictionFPGA, background_data);
-	std::vector<float> shapley_values = explainPrediction(input_data, reqPredictionNN, background_data);
+	auto shapley_values = expected_gradients<float>(PREDICTION_MODEL, input_data, background_data);
 	STOP_TRACE;
-	printf("Shapley values:\n");
-	for (auto value : shapley_values) {
-		printf("%f ", value);
-	}
+	std::cout << "Shapley values: \n" << shapley_values.toString() << std::endl;
 	puts("\n");
 	return 0;
 }

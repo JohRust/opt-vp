@@ -16,8 +16,6 @@ static const uint32_t DMA_OP_MEMCPY = 1;
 
 volatile bool prediction_done = false;
 
-nn::Module PREDICTION_MODEL;
-
 void dma_irq_handler() {
 	prediction_done = true;
 }
@@ -48,10 +46,12 @@ float reqPrediction(const float *input_data, unsigned int input_size) {
 
 float reqPredictionNN(const Tensor<float> &input_data, nn::Module<float> &model, bool return_grads) {
 	auto output = model.forward(input_data);
-	if (return_grads) {
-		model.backward(output);
-	}
-	return output[0].item(); // TODO
+	return output[0].item();
+}
+
+Tensor<float> reqGradientsNN(float pred) {
+	Tensor<float> grads = PREDICTION_MODEL.backward(pred);
+	return grads;
 }
 
 float reqPrediction_dummy(const float *input_data, unsigned int input_size) {
