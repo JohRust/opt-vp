@@ -10,7 +10,7 @@ Most hardware in the area of IoT and embedded systems only ever runs a single ap
 To reduce the cost and increase performance the hardware can be tailored to this application.  
 Unfortunately, identifying, designing, and evaluating application-specific optimizations is complex and requires significant effort.
 
-In order to combine the advantages of high-level and lowlevel approaches we propose this Virtual Prototype to automatically identify promising hardware optimization candidates based on recurring patterns. 
+In order to combine the advantages of high-level and low-level approaches we propose this Virtual Prototype to automatically identify promising hardware optimization candidates based on recurring patterns. 
 
 
 
@@ -21,9 +21,9 @@ For information about the base RISC-V VP please visit [the base repository](http
 * Tracing of any RISC-V binary compiled for RV32IMAC 
 * Generation of bounded execution trees for every instruction
 * Support for arbitrary scoring function for the analysis
-* Ouput dot visualization of iternal trees
-* export best sequences as json
-* full csv export for trees
+* Output dot visualization of internal trees
+* export best sequences as JSON
+* full CSV export for trees
 * reload scoring functions during runtime
 
 ## :rocket: Getting Started
@@ -39,7 +39,7 @@ $ make
 ```
 will build the VP
 
-For dependencies and detailed instruction on how to build the Opt-Vp please follow the instructions from the base RISC-V VP
+For dependencies and detailed instruction on how to build the Opt-VP please follow the instructions from the base RISC-V VP
 
 To uninstall/clean use
 ```console
@@ -60,7 +60,7 @@ You can find examples on how to run and analyze programs in the ./run_and_dot.sh
 ```
 
 Additional arguments include 
-* `--csv` to export all trees as csv files
+* `--csv` to export all trees as CSV files
 * `--dot` to output dot files for the internal trees
 * `--seq` to output the best sequences used in [opt-seq](https://github.com/agra-uni-bremen/opt-seq)
 * `-i` to enter interactive mode after the simulation has finished
