@@ -41,6 +41,16 @@ namespace nn
         virtual Tensor<T> backward(const Tensor<T>& gradOutput) = 0;
 
         /**
+         * @brief Performs the backward pass of the module.
+         * 
+         * This function is a convenience function that allows the user to pass a scalar value.
+         * 
+         * @param gradOutput The gradient value from the next module in the network.
+         * @return The gradient tensor obtained after applying the backward pass.
+         */
+        Tensor<T> backward(const float &gradOutput) {return backward(Tensor<T>(gradOutput));}
+
+        /**
          * @brief Updates the parameters of the module using the specified learning rate.
          * 
          * This method updates the parameters of the module using the specified learning rate.
