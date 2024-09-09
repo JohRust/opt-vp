@@ -10,7 +10,3 @@ override LD = $(CXX)
 test:
 	$(MAKE) -C ../test
 	./../test/test_all
-
-clean: test_clean # Add test_clean to clean target
-test_clean::# Clean test directory
-	$(MAKE) -C ../test clean

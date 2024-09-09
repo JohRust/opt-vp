@@ -70,7 +70,7 @@ class Tensor {
          * 
          * @return A vector containing the data of the tensor.
          */
-        std::vector<T> getData() const;
+        const std::vector<T>& getData() const;
 
         /**
          * @brief Returns the shape of the tensor.

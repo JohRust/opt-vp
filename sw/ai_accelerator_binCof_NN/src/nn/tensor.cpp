@@ -74,7 +74,7 @@ Tensor<T> Tensor<T>::normal(std::vector<int> shape, T mean, T std) {
 }
 
 template <typename T>
-std::vector<T> Tensor<T>::getData() const{
+const std::vector<T>& Tensor<T>::getData() const {
     return data;
 }
 
@@ -125,7 +125,7 @@ Tensor<T> Tensor<T>::transpose() const {
 
 template <typename T>
 Tensor<T> Tensor<T>::matmul(const Tensor<T>& other) const {
-    std::vector<T> other_data = other.getData();
+    const std::vector<T> other_data = other.getData();
     std::vector<int> other_shape = other.getShape();
     if (shape.size() != 2 || other_shape.size() != 2) {
         throw std::invalid_argument("Can only multiply 2D tensors");
@@ -150,8 +150,8 @@ Tensor<T> Tensor<T>::matmul(const Tensor<T>& other) const {
 
 template <typename T>
 Tensor<T> Tensor<T>::mul(const Tensor<T>& other) const{
-    std::vector<T> other_data = other.getData();
-    std::vector<int> other_shape = other.getShape();
+    const std::vector<T> other_data = other.getData();
+    const std::vector<int> other_shape = other.getShape();
     if (shape != other_shape) {
         throw std::invalid_argument("Tensor shapes do not match for elementwise multiplication");
     }
