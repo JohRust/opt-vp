@@ -3,8 +3,6 @@
 #include "nn/module.hpp"
 #include "nn/tensor.hpp"
 
-nn::Module PREDICTION_MODEL;
-
 /**
  * @brief Requests a predictions for the input data using a linear regression model.
  *

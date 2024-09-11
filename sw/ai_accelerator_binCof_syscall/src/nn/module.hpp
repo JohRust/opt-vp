@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "tensor.hpp"
 
 namespace nn
@@ -15,6 +16,8 @@ namespace nn
     class Module
     {
     public:
+        virtual ~Module() {}
+
         /**
          * @brief Performs the forward pass of the module.
          * 
@@ -47,5 +50,38 @@ namespace nn
          * @param learningRate The learning rate to be used for parameter updates.
          */
         virtual void update(double learningRate) = 0;
+
+        /**
+         * Converts the object to a string representation.
+         *
+         * @return The string representation of the object.
+         */
+        virtual std::string toString() = 0;
+
+        /**
+         * @brief Returns the name of the module.
+         * Other than toString this only returns a name, not a longer description.
+         * 
+         * @return The name of the module.
+         */
+        virtual std::string getName() = 0;
+
+        /**
+         * @brief Saves the module to a binary file.
+         * 
+         * This method saves the module to a binary file.
+         * 
+         * @param file The file to save the module to.
+         */
+        virtual void serialize(FILE* file) const = 0;
+
+        /**
+         * @brief Loads the module from a binary file.
+         * 
+         * This method loads the module from a binary file.
+         * 
+         * @param file The file to load the module from.
+         */
+        virtual void deserialize(FILE* file) = 0;
     };
 } // namespace nn

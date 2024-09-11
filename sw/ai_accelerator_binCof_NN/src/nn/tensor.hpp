@@ -87,6 +87,13 @@ class Tensor {
         int getRank() const;
 
         /**
+         * @brief Get the size of the tensor.
+         * 
+         * @return The size of the tensor.
+         */
+        int size() const;
+
+        /**
          * @brief Sets the data of the tensor.
          * 
          * @param data A vector containing the data to be stored in the tensor.

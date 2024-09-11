@@ -1,19 +1,84 @@
 #pragma once
-
+#include <string>
 #include <vector>
+#include <cstdio>
 #include "module.hpp"
 
 namespace nn
 {
-    class Sequential
-    {
+    template <typename T>
+    /**
+     * @class Sequential
+     * @brief Represents a sequential neural network model.
+     * 
+     * The Sequential class is responsible for managing a sequence of layers in a neural network model.
+     * It provides methods for adding layers, performing forward and backward passes, and updating the model's parameters.
+     */
+    class Sequential : public Module<T>{
     public:
-        Sequential();
-        void addLayer(Module<float>* module);
-        Tensor<float> forward(const Tensor<float>& input);
-        Tensor<float> backward(const Tensor<float>& gradOutput);
-        void update(double learningRate);
+
+        /**
+         * @brief Default constructor for the Sequential class.
+         */
+        Sequential() = default;
+
+        /**
+         * @brief Constructor for the Sequential class.
+         * 
+         * @param layers A vector of pointers to the layers in the sequential model.
+         */
+        Sequential(std::vector<Module<T>*> layers) : layers(layers) {};
+
+        /**
+         * @brief Destructor for the Sequential class.
+         * 
+         * This destructor is responsible for cleaning up the memory allocated for each layer in the `layers` vector.
+         * It iterates over each layer and deletes it using the `delete` operator.
+         */
+        ~Sequential();
+
+        /**
+         * @brief Adds a layer to the sequential model.
+         * 
+         * @param module A pointer to the layer to be added.
+         */
+        void addLayer(Module<T>* module);
+
+        /**
+         * @brief Performs a forward pass through the sequential model.
+         * 
+         * @param input The input tensor to the model.
+         * @return The output tensor after the forward pass.
+         */
+        Tensor<T> forward(const Tensor<T>& input) override;
+
+        /**
+         * @brief Performs a backward pass through the sequential model.
+         * 
+         * @param gradOutput The gradient of the loss function with respect to the model's output.
+         * @return The gradient of the loss function with respect to the model's input.
+         */
+        Tensor<T> backward(const Tensor<T>& gradOutput) override;
+
+        /**
+         * @brief Updates the model's parameters using the specified learning rate.
+         * 
+         * @param learningRate The learning rate for the parameter update.
+         */
+        void update(double learningRate) override;
+
+        /**
+         * Converts the object to a string representation.
+         *
+         * @return The string representation of the object.
+         */
+        std::string toString() override;
+
+        std::string getName() override { return "Sequential"; }
+
+
+
     private:
-        std::vector<Module<float>*> layers;
+        std::vector<Module<T>*> layers; /**< The vector of layers in the sequential model. */
     };
 } // namespace nn

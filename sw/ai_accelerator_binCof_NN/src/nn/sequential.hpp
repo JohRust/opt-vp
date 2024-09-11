@@ -15,6 +15,19 @@ namespace nn
      */
     class Sequential : public Module<T>{
     public:
+
+        /**
+         * @brief Default constructor for the Sequential class.
+         */
+        Sequential() = default;
+
+        /**
+         * @brief Constructor for the Sequential class.
+         * 
+         * @param layers A vector of pointers to the layers in the sequential model.
+         */
+        Sequential(std::vector<Module<T>*> layers) : layers(layers) {};
+
         /**
          * @brief Destructor for the Sequential class.
          * 

@@ -24,7 +24,7 @@ Tensor<T> nn::Linear<T>::backward(const Tensor<T>& gradOutput) {
     auto gradInput = gradOutput.matmul(weights);
     auto gradWeights = input.transpose().matmul(gradOutput);
     auto gradBiases = gradOutput.sum(0);
-    #define LIN_DEBUG
+    //#define LIN_DEBUG
     #ifdef LIN_DEBUG
     std::cout << "--------" << std::endl;
     std::cout << "input:\n" << input.toString() << std::endl;

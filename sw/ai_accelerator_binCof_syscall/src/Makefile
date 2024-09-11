@@ -1,7 +1,9 @@
-OBJECTS  = main.o bootstrap.o ai_accelerator.o ai_caller.o shap.o irq.o
+OBJECTS  = $(patsubst %.cpp, %.o,$(wildcard *.cpp)) $(patsubst %.c, %.o,$(wildcard *.c)) $(patsubst %.S, %.o,$(wildcard *.S))
 CFLAGS   = -march=rv32im -mabi=ilp32 -g
 CXXFLAGS = -march=rv32im -mabi=ilp32 -g
 LDFLAGS  = -nostartfiles -Wl,--no-relax
+
+OBJECTS += nn/tensor.o nn/linear.o nn/relu.o nn/sequential.o nn/expected_gradients.o
 
 include ../../Makefile.common
 override LD = $(CXX)

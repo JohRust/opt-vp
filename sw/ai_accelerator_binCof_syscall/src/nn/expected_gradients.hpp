@@ -6,7 +6,7 @@
 
 #include "module.hpp"
 #include "tensor.hpp"
-//#include "../ai_caller.h"
+#include "../ai_caller.h"
 
 /**
  * Replaces values in the given array based on the provided mask and new values.

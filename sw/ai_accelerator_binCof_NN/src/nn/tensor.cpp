@@ -89,6 +89,11 @@ int Tensor<T>::getRank() const {
 }
 
 template <typename T>
+int Tensor<T>::size() const {
+    return data.size();
+}
+
+template <typename T>
 void Tensor<T>::setData(std::vector<T> data) {
     if (data.size() != this->data.size()) {
         throw std::invalid_argument("Data size does not match tensor size");

@@ -1,6 +1,6 @@
 #include <vector>
 #include "ai_caller.h"
-#include "ai_accelerator.h"
+#include "nn/tensor.hpp"
 extern "C" {
 	#include "irq.h"
 }
@@ -24,6 +24,7 @@ void init_dma() {
 	register_interrupt_handler(4, dma_irq_handler);
 }
 
+/*
 float reqPredictionFPGA(const float *input_data, unsigned int input_size) {
 	float pred = predict(input_data, input_size, 0);
 	// Imagine that the prediction is done on a parallel hardware accelerator
@@ -42,15 +43,15 @@ float reqPredictionFPGA(const float *input_data, unsigned int input_size) {
 
 float reqPrediction(const float *input_data, unsigned int input_size) {
 	return predict(input_data, input_size, 0);
-}
+}*/
 
 float reqPredictionNN(const Tensor<float> &input_data, nn::Module<float> &model, bool return_grads) {
 	auto output = model.forward(input_data);
 	return output[0].item();
 }
 
-Tensor<float> reqGradientsNN(float pred) {
-	Tensor<float> grads = PREDICTION_MODEL.backward(pred);
+Tensor<float> reqGradientsNN(float pred, nn::Module<float> &model) {
+	Tensor<float> grads = model.backward(Tensor<float>({pred}, {1}));
 	return grads;
 }
 
