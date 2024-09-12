@@ -6,21 +6,10 @@
 #include "linear.hpp"
 #include "sequential.hpp"
 #include "loss.hpp"
-#include "expected_gradients.hpp"
 
 template class Tensor<float>;
 
 int main() {
-    {
-        auto t = Tensor<float>(std::vector<float>({1, 2, 3, 4, 5, 6}), std::vector<int>({2, 3})); // 2 samples, 3 features
-        t.at({0,2}) = 100;
-        std::cout << "Tensor: " << t[{0}].toString() << std::endl;
-        std::vector<float> new_values = {41, 42, 43};
-        std::vector<bool> mask = {true, false, true};
-        replaceValues<float>(t, mask, new_values);
-        std::cout << "Tensor: " << t.toString() << std::endl;
-    }
-    std::cout << "______________________" << std::endl;
     {
         Tensor<float> x_train({
             -0.2916937497932768,  -1.913280244657798,   0.3142473325952739,  0.5425600435859647,   1.5792128155073915,

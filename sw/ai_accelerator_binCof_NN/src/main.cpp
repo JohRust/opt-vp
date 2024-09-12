@@ -8,6 +8,7 @@
 #include "nn/loss.hpp"
 #include "nn/expected_gradients.hpp"
 
+
 template class Tensor<float>;
 
 int main() {
@@ -68,6 +69,9 @@ int main() {
             seq.update(learning_rate);
             //learning_rate *= 0.99; // learning rate decay
         }
+
+        Tensor<float> test_sample = x_train[0];
+        //Tensor<float> shapley_values = expected_gradients(seq, test_sample, x_train, 100);
     }
     return 0;
 }

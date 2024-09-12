@@ -75,15 +75,6 @@ uint32_t binomialCoeff(uint32_t n, uint32_t k);
 float shapleyFrequency(uint32_t n, uint32_t s);
 
 /**
- * Calculates the marginal contribution of a feature in the input data based on a given mask.
- * 
- * @param input_data The input data vector.
- * @param mask The mask vector indicating which elements of the input data should be masked.
- * @return The marginal contribution of the feature.
- */
-float marginalContribution(const std::vector<float>& input_data, const std::vector<bool>& mask);
-
-/**
  * Get a binary representation of n as a vector of bools.
  * E.g. getAsBoolVector(5, 3) -> 101 -> {true, false, true}
  * This is an easy way to get masks for all subsets of a set.
