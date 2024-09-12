@@ -47,15 +47,6 @@ uint32_t binomialCoeff(uint32_t n, uint32_t k);
 float shapleyFrequency(uint32_t n, uint32_t s);
 
 /**
- * Calculates the marginal contribution of a feature in the input data based on a given mask.
- * 
- * @param input_data The input data vector.
- * @param mask The mask vector indicating which elements of the input data should be masked.
- * @return The marginal contribution of the feature.
- */
-float marginalContribution(const std::vector<float>& input_data, const std::vector<bool>& mask);
-
-/**
  * Explains the prediction of the model by calculating the Shapley value of every value in the input data.
  * 
  * @param input_data The input data vector.
