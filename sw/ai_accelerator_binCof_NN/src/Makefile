@@ -1,11 +1,10 @@
-OBJECTS  = $(patsubst %.cpp, %.o,$(wildcard *.cpp)) $(patsubst %.c, %.o,$(wildcard *.c)) $(patsubst %.S, %.o,$(wildcard *.S))
+# OBJECTS  = $(patsubst %.cpp, %.o,$(wildcard *.cpp)) $(patsubst %.c, %.o,$(wildcard *.c)) $(patsubst %.S, %.o,$(wildcard *.S))
+OBJECTS = main.o bootstrap.o irq.o ai_caller.o irq.o
 CFLAGS   = -march=rv32im -mabi=ilp32 -g
 CXXFLAGS = -march=rv32im -mabi=ilp32 -g
 LDFLAGS  = -nostartfiles -Wl,--no-relax
 
-OBJECTS += nn/tensor.o nn/linear.o nn/relu.o nn/sequential.o
-
-$(info OBJECTS: $(OBJECTS))
+OBJECTS += nn/tensor.o nn/linear.o nn/relu.o
 
 include ../../Makefile.common
 override LD = $(CXX)

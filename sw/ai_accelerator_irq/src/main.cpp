@@ -6,9 +6,14 @@
 extern "C" {
 	#include "irq.h"
 }
+#include "nn/tensor.hpp"
+#include "nn/relu.hpp"
+#include "nn/sequential.hpp"
 
 int main(int argc, char **argv) {
 	init_dma();
+	Tensor<float> input_tensor({1.0, 2.0, 3.0, 4.0});
+	nn::Sequential<float> model;
 	std::vector<float> input_data = {1.0, 2.0, 3.0, 4.0};
 	std::vector<std::vector<float>> background_data = {
 		{0.0, 0.5, 1.0, 1.5}, {1.0, 1.5, 2.0, 2.5}, {2.0, 2.5, 3.0, 3.5}};

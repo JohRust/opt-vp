@@ -1,6 +1,7 @@
 .globl _start
 .globl main
 .globl level_1_interrupt_handler
+.globl make_syscall
 
 .equ SYSCALL_ADDR, 0x02010000
 .equ PLIC_ENABLED_IRQ_ADDR, 0x40002000
@@ -12,6 +13,14 @@ li   t0, SYSCALL_ADDR
 csrr a6, mhartid
 sw   a6, 0(t0)
 .endm
+
+#Make syscall with two parameters
+make_syscall:
+    mv a7, a2
+    li t0, SYSCALL_ADDR
+    csrr a6, mhartid
+    sw a6, 0(t0)
+    ret
 
 _start:
 la t0, level_0_interrupt_handler
@@ -99,4 +108,3 @@ LOAD	x30, 29 * REGBYTES(sp)
 LOAD	x31, 30 * REGBYTES(sp)
 addi	sp, sp, REGBYTES * 32
 mret
-

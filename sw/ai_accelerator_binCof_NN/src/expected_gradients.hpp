@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "module.hpp"
-#include "tensor.hpp"
+#include "nn/module.hpp"
+#include "nn/tensor.hpp"
 //#include "../ai_caller.h"
 
 /**

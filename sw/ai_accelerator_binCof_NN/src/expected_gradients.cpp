@@ -1,7 +1,7 @@
 #include "expected_gradients.hpp"
 
 extern "C" {
-	#include "../syscall.h"
+	#include "syscall.h"
 }
 
 

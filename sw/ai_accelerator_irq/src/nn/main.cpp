@@ -1,35 +1,15 @@
 #include <vector>
 #include <iostream>
-#include "nn/tensor.hpp"
-#include "nn/relu.hpp"
-#include "nn/module.hpp"
-#include "nn/linear.hpp"
-#include "nn/sequential.hpp"
-#include "nn/loss.hpp"
-#include "ai_caller.h"
-//#include "expected_gradients.hpp"
-
-extern "C" {
-    #include "irq.h"
-}
-
+#include "tensor.hpp"
+#include "relu.hpp"
+#include "module.hpp"
+#include "linear.hpp"
+#include "sequential.hpp"
+#include "loss.hpp"
 
 template class Tensor<float>;
 
 int main() {
-    {
-        init_dma();
-        /*
-        auto t = Tensor<float>(std::vector<float>({1, 2, 3, 4, 5, 6}), std::vector<int>({2, 3})); // 2 samples, 3 features
-        t.at({0,2}) = 100;
-        std::cout << "Tensor: " << t[{0}].toString() << std::endl;
-        std::vector<float> new_values = {41, 42, 43};
-        std::vector<bool> mask = {true, false, true};
-        replaceValues<float>(t, mask, new_values);
-        std::cout << "Tensor: " << t.toString() << std::endl;
-        */
-    }
-    std::cout << "______________________" << std::endl;
     {
         Tensor<float> x_train({
             -0.2916937497932768,  -1.913280244657798,   0.3142473325952739,  0.5425600435859647,   1.5792128155073915,
@@ -77,9 +57,6 @@ int main() {
             seq.update(learning_rate);
             //learning_rate *= 0.99; // learning rate decay
         }
-
-        Tensor<float> test_sample = x_train[0];
-        //Tensor<float> shapley_values = expected_gradients(seq, test_sample, x_train, 100);
     }
     return 0;
 }
