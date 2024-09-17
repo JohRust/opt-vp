@@ -34,6 +34,15 @@ void replaceValues(Tensor<T> array, const std::vector<bool> &mask, const std::ve
 }
 
 /**
+ * (old version) Replaces values in the given array based on the provided mask and new values.
+ *
+ * @param array The array of float values to be modified.
+ * @param mask The mask indicating which values in the array should be replaced.
+ * @param newValues The new values to replace the masked values in the array.
+ */
+void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, const std::vector<float>& newValues);
+
+/**
  * Calculates the factorial of a given number.
  * 
  * @param n The number for which the factorial is to be calculated.
@@ -86,6 +95,19 @@ float shapleyFrequency(uint32_t n, uint32_t s);
  * @return A vector of bools representing the binary representation of n.
  */
 std::vector<bool> getAsBoolVector(uint32_t n, uint16_t length);
+
+
+/**
+ * (Old version)Explains the prediction of the model by calculating the Shapley value of every value in the input data.
+ * 
+ * @param input_data The input data vector.
+ * @param func The function to be used for prediction.
+ * @param background_data The background data vector. Optional, defaults to a vector of zeros.
+ * @return The vector to store the Shapley values in.
+ */
+std::vector<float> explainPrediction(std::vector<float> input_data, float (func)(const float*, unsigned int), std::vector<std::vector<float>> background_data);
+std::vector<float> explainPrediction(std::vector<float> input_data, float (func)(const float*, unsigned int));
+
 
 /**
  * Explains the prediction of the model by calculating the Shapley value of every value in the input data.

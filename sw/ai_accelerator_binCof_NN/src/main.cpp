@@ -4,9 +4,10 @@
 #include "nn/relu.hpp"
 #include "nn/module.hpp"
 #include "nn/linear.hpp"
-#include "nn/sequential.hpp"
+#include "nn/sequential_new.hpp"
 #include "nn/loss.hpp"
 #include "ai_caller.h"
+#include "syscall.h"
 //#include "expected_gradients.hpp"
 
 extern "C" {

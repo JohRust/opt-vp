@@ -1,8 +1,10 @@
-#include "shap.h"
-#include <cstdint>
-#include <iostream>
-#include "ai_caller.h"
+#include "shapley.hpp"
 
+extern "C" {
+	#include "syscall.h"
+}
+
+// old version
 void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, const std::vector<float>& newValues) {
 	// Replace values in the array based on the mask
 	for (std::size_t i = 0; i < array.size(); ++i) {
@@ -13,21 +15,27 @@ void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, con
 }
 
 uint32_t binomialCoeff(uint32_t n, uint32_t k) {
-	// Calculate the binomial coefficient
+//#define BINCOEFF_SYSCALL
+#ifndef BINCOEFF_SYSCALL
 	if (k > n - k) {
 		k = n - k;
 	}
 	uint32_t res = 1;
-	for (uint32_t i = 0; i < k; ++i) {  // tested
+	for (uint32_t i = 0; i < k; ++i) {
 		res *= (n - i);
 		res /= (i + 1);
 	}
 	return res;
+#endif
+#ifdef BINCOEFF_SYSCALL
+	return make_syscall(n, k, 701);
+#endif
 }
 
 uint64_t factorial(uint64_t n) {
 	// Factorials larger than 20 cause overflow
-	if (n > 20) return -1;
+	if (n > 20)
+		throw std::invalid_argument("Factorial of numbers greater than 20 is not supported as it causes overflow");
 
 	uint64_t res = 1;
 	for (uint32_t i = 1; i <= n; ++i) {
@@ -36,21 +44,34 @@ uint64_t factorial(uint64_t n) {
 	return res;
 }
 
+// old version
 std::vector<float> sampleFromData(const std::vector<std::vector<float>> data) {
 	std::vector<float> res;
-	for (size_t i=0; i < data[0].size(); ++i) {
+	for (std::size_t i=0; i < data[0].size(); ++i) {
 		res.push_back(data[rand() % data.size()][i]);
 	}
 	return res;
 }
 
+
 float shapleyFrequency(uint32_t n, uint32_t s) {
 	// Calculate the frequency of feature i in the shapley value calculation.
 	// Equvalent to (n-s-1)! * s! / n!, but without overflow
-	if (n-s <= 0) {
+	if (n - s <= 0) {
 		return 0;
 	}
-	return 1.0f / (binomialCoeff(n, s) * (n-s));
+	return 1.0f / (binomialCoeff(n, s) * (n - s));
+}
+
+
+std::vector<bool> getAsBoolVector(uint32_t n, uint16_t length) {
+	std::vector<bool> res(length, false);
+	for (uint16_t i = 0; i < length; ++i) {
+		if (n & (1 << i)) {
+			res[i] = true;
+		}
+	}
+	return res;
 }
 
 std::vector<float> explainPrediction(std::vector<float> input_data, float (func)(const float*, unsigned int)) {
@@ -86,14 +107,4 @@ std::vector<float> explainPrediction(std::vector<float> input_data, float (func)
 		}
 	}
 	return shapley_values;
-}
-
-std::vector<bool> getAsBoolVector(uint32_t n, uint16_t length) {
-	std::vector<bool> res(length, false);
-	for (uint16_t i = 0; i < length; ++i) {
-		if (n & (1 << i)) {
-			res[i] = true;
-		}
-	}
-	return res;
 }

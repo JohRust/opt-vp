@@ -1,7 +1,7 @@
 #include <vector>
 #include "stdio.h"
 #include "unistd.h"
-#include "shap.h"
+#include "shapley.hpp"
 #include "ai_caller.h"
 extern "C" {
 	#include "irq.h"
@@ -10,7 +10,6 @@ extern "C" {
 #include "nn/relu.hpp"
 #include "nn/linear.hpp"
 #include "nn/sequential_new.hpp"
-#include "expected_gradients.hpp"
 #include "syscall.h"
 
 int main(int argc, char **argv) {
