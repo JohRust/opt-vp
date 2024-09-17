@@ -5,10 +5,10 @@
 
 template <typename T>
 nn::Linear<T>::Linear(int inputSize, int outputSize) {
-    weights = Tensor<float>::normal({outputSize, inputSize});
-    biases = Tensor<float>::normal({outputSize});
-    gradWeights = Tensor<float>::zeros({outputSize, inputSize});
-    gradBiases = Tensor<float>::zeros({outputSize});
+    weights = Tensor<T>::normal({outputSize, inputSize});
+    biases = Tensor<T>::normal({outputSize});
+    gradWeights = Tensor<T>::zeros({outputSize, inputSize});
+    gradBiases = Tensor<T>::zeros({outputSize});
 }
 
 template <typename T>

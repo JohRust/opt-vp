@@ -18,10 +18,10 @@ namespace nn{
         void serialize(FILE* file) const override;
         void deserialize(FILE* file) override;
     private:
-        Tensor<float> weights;
-        Tensor<float> biases;
-        Tensor<float> gradWeights;
-        Tensor<float> gradBiases;
+        Tensor<T> weights;
+        Tensor<T> biases;
+        Tensor<T> gradWeights;
+        Tensor<T> gradBiases;
         Tensor<T> input;
     };
 }

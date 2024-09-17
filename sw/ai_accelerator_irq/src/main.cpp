@@ -8,11 +8,14 @@ extern "C" {
 }
 #include "nn/tensor.hpp"
 #include "nn/relu.hpp"
-#include "nn/sequential.hpp"
+#include "nn/linear.hpp"
+#include "nn/sequential_new.hpp"
 
 int main(int argc, char **argv) {
 	init_dma();
 	Tensor<float> input_tensor({1.0, 2.0, 3.0, 4.0});
+	nn::Linear<float> linear_layer(4, 2);
+	nn::ReLU<float> relu_layer;
 	nn::Sequential<float> model;
 	std::vector<float> input_data = {1.0, 2.0, 3.0, 4.0};
 	std::vector<std::vector<float>> background_data = {
