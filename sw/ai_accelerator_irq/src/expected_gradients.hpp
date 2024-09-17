@@ -96,13 +96,13 @@ std::vector<bool> getAsBoolVector(uint32_t n, uint16_t length);
  * @return The vector to store the Shapley values in.
  */
 template <typename T>
-Tensor<T> explainPrediction(nn::Module<T> &model, Tensor<T> &input) {
+Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input) {
 	Tensor<T> bgData = Tensor<T>::zeros(input.getShape());
 	return explainPrediction(input, model, bgData);
 }
 
 template <typename T>
-Tensor<T> explainPrediction(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &background_dataset) {
+Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &background_dataset) {
 	if (input.getRank() != 2) {
 		throw std::invalid_argument("Input data must be a 2D tensor");
 	}

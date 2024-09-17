@@ -10,13 +10,15 @@ extern "C" {
 #include "nn/relu.hpp"
 #include "nn/linear.hpp"
 #include "nn/sequential_new.hpp"
+#include "expected_gradients.hpp"
+#include "syscall.h"
 
 int main(int argc, char **argv) {
 	init_dma();
 	Tensor<float> input_tensor({1.0, 2.0, 3.0, 4.0});
-	nn::Linear<float> linear_layer(4, 2);
-	nn::ReLU<float> relu_layer;
 	nn::Sequential<float> model;
+	model.addLayer(new nn::Linear<float>(4, 4));
+	model.addLayer(new nn::ReLU<float>());
 	std::vector<float> input_data = {1.0, 2.0, 3.0, 4.0};
 	std::vector<std::vector<float>> background_data = {
 		{0.0, 0.5, 1.0, 1.5}, {1.0, 1.5, 2.0, 2.5}, {2.0, 2.5, 3.0, 3.5}};
