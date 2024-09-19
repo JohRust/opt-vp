@@ -9,8 +9,10 @@ extern "C" {
 #include "nn/tensor.hpp"
 #include "nn/relu.hpp"
 #include "nn/linear.hpp"
-#include "nn/sequential_new.hpp"
+#include "nn/sequential.hpp"
 #include "syscall.h"
+
+void *__dso_handle = 0; // I dont know why this is needed, but it is needed for linking.
 
 int main(int argc, char **argv) {
 	init_dma();
