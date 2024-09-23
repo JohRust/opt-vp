@@ -27,7 +27,7 @@ void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor
 	std::vector<T> data = array.getData();
 	for (std::size_t i = 0; i < data.size(); ++i) {
 		if (!mask[i%mask.size()]) {
-			data[i] = newValues[i];
+			data[i] = newValues.at({i});
 		}
 	}
 	array.setData(data);
@@ -50,16 +50,16 @@ void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, con
  */
 uint64_t factorial(uint64_t n);
 
-/**
+/** 
  * Creates a new vector by sampling each feature from a vector in the input data.
  * @param data The input data vector.
  * @return A random vector sampled from the input data.
 */
 template <typename T>
 Tensor<T> sampleFromData(const Tensor<T> data) {
-    std::vector<float> res;
+	std::vector<float> res;
 	for (size_t i = 0; i < data.getShape()[0]; ++i) {
-		res.push_back(data[rand() % data.size()][i]);
+		res.push_back(data.at({rand() % data.size(), i}));
 	}
 	Tensor<T> res_tensor = Tensor<T>(res);
 	return res_tensor;
@@ -155,7 +155,7 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 			auto pred_without_i = model.forward(data_masked);
 
 			for (int i = 0; i < data_masked.getShape()[0]; ++i) {
-				data_masked.at({i, feat_i}) = input[i][feat_i];
+				data_masked.at({i, feat_i}) = input.at({i, feat_i});
 			}
 			auto pred_with_i = model.forward(data_masked);
 
