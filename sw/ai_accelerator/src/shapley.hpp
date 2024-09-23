@@ -16,7 +16,7 @@
  * @param newValues The new values to replace the masked values in the array.
  */
 template <typename T>
-void replaceValues(Tensor<T> array, const std::vector<bool> &mask, const std::vector<T> &newValues) {
+void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor<T>& newValues) {
     if (mask.size() != newValues.size()) {
 		throw std::invalid_argument("Mask and newValues must have the same length");
 	}
@@ -149,8 +149,8 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 				}
 			}
 			Tensor<T> data_masked(input);
-			auto sampled_background = sampleFromData(background_dataset);
-			replaceValues(data_masked, mask, sampled_background);
+			Tensor<T> sampled_background = sampleFromData<float>(background_dataset);
+			replaceValues<float>(data_masked, mask, sampled_background);
 
 			auto pred_without_i = model.forward(data_masked);
 
