@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <gtest/gtest.h>
-#include "../src/shap.h"
+#include "../src/shapley.hpp"
 #include "../src/ai_caller.h"
 
 TEST(getAsBoolVector, getAsBoolVectorTest) {

@@ -34,7 +34,7 @@ void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor
 }
 
 /**
- * (old version) Replaces values in the given array based on the provided mask and new values.
+ * (Old version) Replaces values in the given array based on the provided mask and new values.
  *
  * @param array The array of float values to be modified.
  * @param mask The mask indicating which values in the array should be replaced.
@@ -64,6 +64,11 @@ Tensor<T> sampleFromData(const Tensor<T> data) {
 	Tensor<T> res_tensor = Tensor<T>(res);
 	return res_tensor;
 }
+
+/**
+ * (Old version) Creates a new vector by sampling each feature from a vector in the input data.
+ */
+std::vector<float> sampleFromData(const std::vector<std::vector<float>> data);
 
 /**
  * Calculates the binomial coefficient.
