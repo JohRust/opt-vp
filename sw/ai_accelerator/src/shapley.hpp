@@ -189,7 +189,7 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<T> alpha_dist(0, 1);
 	// Create a generator to select a random sample from the background dataset
-	std::uniform_int_distribution<int> index_dist(0, background_dataset.size() - 1);
+	std::uniform_int_distribution<int> index_dist(0, background_dataset.getShape()[0] - 1);
 	// Create a tensor to store the expected gradients
 	Tensor<T> grads = Tensor<T>::zeros(input.getShape());
 	Tensor<T> input_pred = module.forward(input);
@@ -202,7 +202,8 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		float alpha = alpha_dist(gen);
 		// Select a random sample from the background dataset
 		int random_index = index_dist(gen);
-		Tensor<T> random_sample = background_dataset[random_index];
+		printf("Random index: %d\n", random_index);
+		Tensor<T> random_sample = background_dataset[{random_index}];
 		Tensor<T> input_minus_random = input - random_sample;
 		Tensor<T> pred_current = module.forward(random_sample + (input_minus_random * alpha));
 		//Tensor<T> current_grad = module.backward(pred_current - input_pred);  // I think this is incorrect
