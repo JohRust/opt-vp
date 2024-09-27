@@ -108,6 +108,13 @@ class Tensor {
         void setShape(std::vector<int> shape);
 
         /**
+         * @brief Reshapes the tensor to the specified shape.
+         * 
+         * @param new_shape The new shape of the tensor.
+         */
+        void expandDims(int axis);
+
+        /**
          * @brief Transposes the tensor.
          *
          * This function returns a new tensor that is the transpose of the current tensor.

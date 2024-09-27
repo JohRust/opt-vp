@@ -48,13 +48,13 @@ SYS_EXIT 0
 
 level_0_interrupt_handler:
 // store execution context on the stack (register content)
-addi    sp, sp, -REGBYTES * 32
-STORE	x1, 0x0(sp)
-STORE	x4, 3 * REGBYTES(sp)
-STORE	x5, 4 * REGBYTES(sp)
-STORE	x6, 5 * REGBYTES(sp)
-STORE	x7, 6 * REGBYTES(sp)
-STORE	x10, 9 * REGBYTES(sp)
+addi    sp,  sp, -REGBYTES * 32
+STORE	x1,  0x0(sp)
+STORE	x4,  3  * REGBYTES(sp)
+STORE	x5,  4  * REGBYTES(sp)
+STORE	x6,  5  * REGBYTES(sp)
+STORE	x7,  6  * REGBYTES(sp)
+STORE	x10, 9  * REGBYTES(sp)
 STORE	x11, 10 * REGBYTES(sp)
 STORE	x12, 11 * REGBYTES(sp)
 STORE	x13, 12 * REGBYTES(sp)

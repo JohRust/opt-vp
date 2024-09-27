@@ -1,5 +1,4 @@
 #include <vector>
-#include <stdexcept>
 #include <iostream>
 #include "linear.hpp"
 
@@ -54,7 +53,8 @@ std::string nn::Linear<T>::toString() {
 template <typename T>
 void nn::Linear<T>::setWeights(Tensor<float> weights) {
     if (weights.getRank() != 2) {
-        throw std::invalid_argument("Invalid shape for weights, needs a 2D tensor");
+        std::cerr << "Invalid shape for weights, needs a 2D tensor" << std::endl;
+        exit(1);
     }
     this->weights = weights;
 }
@@ -62,7 +62,8 @@ void nn::Linear<T>::setWeights(Tensor<float> weights) {
 template <typename T>
 void nn::Linear<T>::setBiases(Tensor<float> biases) {
     if (biases.getRank() != 1) {
-        throw std::invalid_argument("Invalid shape for biases, needs a 1D tensor");
+        std::cerr << "Invalid shape for biases, needs a 1D tensor" << std::endl;
+        exit(1);
     }
     this->biases = biases;
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <random>
-#include <stdexcept>
 #include <vector>
+#include <iostream>
 
 #include "nn/module.hpp"
 #include "nn/tensor.hpp"
@@ -18,10 +18,12 @@
 template <typename T>
 void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor<T>& newValues) {
     if (mask.size() != newValues.size()) {
-		throw std::invalid_argument("Mask and newValues must have the same length");
+		std::cerr << "Mask and newValues must have the same length" << std::endl;
+		exit(1);
 	}
 	if (array.getShape()[1] != mask.size()) {
-		throw std::invalid_argument("Mask needs to be as long as the number of features");
+		std::cerr << "Mask needs to be as long as the number of features" << std::endl;
+		exit(1);
 	}
 	// Replace values in the array based on the mask
 	std::vector<T> data = array.getData();
@@ -131,10 +133,11 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input) {
 template <typename T>
 Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &background_dataset) {
 	if (input.getRank() != 2) {
-		throw std::invalid_argument("Input data must be a 2D tensor");
+		std::cerr << "Input data must be a 2D tensor" << std::endl;
+		exit(1);
 	}
 	if (background_dataset.getRank() != 2) {
-		throw std::invalid_argument("Background data must be a 2D tensor");
+		std::cerr << "Background data must be a 2D tensor" << std::endl;
 	}
 
 	uint32_t n = input.size();
@@ -197,15 +200,18 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 	// Use a form of Monte Carlo estimates to calculate the expected gradients
 	// E[f(x)] = 1/N * sum(f(x_i))
 	// See https://sourav-64777.medium.com/estimating-expectations-and-gibbs-sampling-3c9e1b7e6c20
+
+	const Tensor<T> input_i = input[0]; //For now we only support one sample, but expect the input to be a 2D tensor
 	for (int i = 0; i < n_samples; i++) {
-		Tensor<T> input_i = input[i];
 		float alpha = alpha_dist(gen);
 		// Select a random sample from the background dataset
 		int random_index = index_dist(gen);
-		printf("Random index: %d\n", random_index);
-		Tensor<T> random_sample = background_dataset[{random_index}];
-		Tensor<T> input_minus_random = input - random_sample;
-		Tensor<T> pred_current = module.forward(random_sample + (input_minus_random * alpha));
+		printf("Random index");
+		const Tensor<T> random_sample = background_dataset[{random_index}];
+		Tensor<T> input_minus_random = input_i - random_sample;
+		Tensor<T> temp_sample = random_sample + (input_minus_random * alpha);
+		temp_sample.expandDims(0);
+		Tensor<T> pred_current = module.forward(temp_sample);
 		//Tensor<T> current_grad = module.backward(pred_current - input_pred);  // I think this is incorrect
 		Tensor<T> current_grad = module.backward(pred_current); // This should be right. See https://www.tensorflow.org/tutorials/interpretability/integrated_gradients#compute_gradients
 		grads = grads + input_minus_random.mul(current_grad);
