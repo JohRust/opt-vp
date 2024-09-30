@@ -1,4 +1,4 @@
-#include "ai_accelerator.h"
+#include "ai_accelerator.hpp"
 
 void wait_nops(uint32_t nOps) {
 	for (uint32_t i = 0; i < nOps; i++) {

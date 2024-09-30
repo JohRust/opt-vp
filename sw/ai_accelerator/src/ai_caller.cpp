@@ -1,5 +1,5 @@
-#include "ai_caller.h"
-#include "ai_accelerator.h"
+#include "ai_caller.hpp"
+#include "ai_accelerator.hpp"
 extern "C" {
 	#include "irq.h"
 }
