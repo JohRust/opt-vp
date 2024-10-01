@@ -1,4 +1,7 @@
-OBJECTS  = main.o bootstrap.o ai_accelerator.o ai_caller.o irq.o nn/tensor.o nn/linear.o nn/relu.o shapley.o
+OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
+# All object files in nn directory
+OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
+
 CFLAGS   = -march=rv32im -mabi=ilp32 -g
 CXXFLAGS = -march=rv32im -mabi=ilp32 -g
 LDFLAGS  = -nostartfiles -Wl,--no-relax
