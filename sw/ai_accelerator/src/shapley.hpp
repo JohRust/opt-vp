@@ -138,9 +138,10 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 	}
 	if (background_dataset.getRank() != 2) {
 		std::cerr << "Background data must be a 2D tensor" << std::endl;
+		exit(1);
 	}
 
-	uint32_t n = input.size();
+	uint32_t n = input.getShape()[1];
 	Tensor<T> shapley_values = Tensor<T>::zeros(input.getShape());
 	std::vector<bool> mask(n, false);
 
@@ -157,18 +158,18 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 				}
 			}
 			Tensor<T> data_masked(input);
-			Tensor<T> sampled_background = sampleFromData<float>(background_dataset);
+			Tensor<T> sampled_background = sampleFromData<float>(background_dataset); //fails here
 			replaceValues<float>(data_masked, mask, sampled_background);
 
-			auto pred_without_i = model.forward(data_masked);
+			auto pred_without_feat_i = model.forward(data_masked);
 
 			for (int i = 0; i < data_masked.getShape()[0]; ++i) {
 				data_masked.at({i, feat_i}) = input.at({i, feat_i});
 			}
-			auto pred_with_i = model.forward(data_masked);
+			auto pred_with_feat_i = model.forward(data_masked);
 
 			for (int i = 0; i < shapley_values.getShape()[0]; ++i) {
-				shapley_values.at({i, feat_i}) += shapleyFrequency(n, subsetSize) * (pred_with_i[i].item() - pred_without_i[i].item());
+				shapley_values.at({i, feat_i}) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i[i].item() - pred_without_feat_i[i].item());
 			}
 		}
 	}
@@ -187,6 +188,15 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
  */
 template <typename T>
 Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &background_dataset, int n_samples=100){
+	if (input.getRank() != 2) {
+		std::cerr << "Input data must be a 2D tensor" << std::endl;
+		exit(1);
+	}
+	if (background_dataset.getRank() != 2) {
+		std::cerr << "Background data must be a 2D tensor" << std::endl;
+		exit(1);
+	}
+
 	// Create uniform distribution generator
 	std::random_device rd;
 	std::mt19937 gen(rd());
