@@ -27,7 +27,7 @@ void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor
 	}
 	// Replace values in the array based on the mask
 	std::vector<T> data = array.getData();
-	for (std::size_t i = 0; i < data.size(); ++i) {
+	for (int i = 0; i < data.size(); ++i) {
 		if (!mask[i%mask.size()]) {
 			data[i] = newValues.at({i});
 		}
@@ -64,7 +64,7 @@ Tensor<T> sampleFromData(const Tensor<T> data) {
 		exit(1);
 	}
 	std::vector<float> res;
-	for (size_t i = 0; i < data.getShape()[1]; ++i) {
+	for (int i = 0; i < data.getShape()[1]; ++i) {
 		res.push_back(data.at({rand() % data.size(), i}));
 	}
 	Tensor<T> res_tensor = Tensor<T>(res);
@@ -149,7 +149,7 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 	Tensor<T> shapley_values = Tensor<T>::zeros(input.getShape());
 	std::vector<bool> mask(n, false);
 
-	for (uint32_t feat_i = 0; feat_i < n; ++feat_i) {  // Shapley value for feature i
+	for (int feat_i = 0; feat_i < n; ++feat_i) {  // Shapley value for feature i
 		uint64_t num_subsets = 1 << (n - 1);           // 2^(n-1) subsets of N\{i}
 		for (uint32_t j = 0; j < num_subsets; ++j) {
 			auto mask = getAsBoolVector(j, n - 1);
