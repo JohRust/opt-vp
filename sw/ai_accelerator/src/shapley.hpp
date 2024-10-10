@@ -17,12 +17,12 @@
  */
 template <typename T>
 void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor<T>& newValues) {
-    if (mask.size() != newValues.size()) {
-		std::cerr << "Mask and newValues must have the same length" << std::endl;
+    if (mask.size() != newValues.getShape()[0]) {
+		printf("Mask and newValues must have the same length: %d != %d", mask.size(), newValues.getShape()[0]);
 		exit(1);
 	}
 	if (array.getShape()[1] != mask.size()) {
-		std::cerr << "Mask needs to be as long as the number of features" << std::endl;
+		printf("Mask needs to be as long as the number of features");
 		exit(1);
 	}
 	// Replace values in the array based on the mask
@@ -59,8 +59,12 @@ uint64_t factorial(uint64_t n);
 */
 template <typename T>
 Tensor<T> sampleFromData(const Tensor<T> data) {
+	if (data.getRank() != 2) {
+		printf("Input data must be a 2D tensor (samples, features), is %dD", data.getRank());
+		exit(1);
+	}
 	std::vector<float> res;
-	for (size_t i = 0; i < data.getShape()[0]; ++i) {
+	for (size_t i = 0; i < data.getShape()[1]; ++i) {
 		res.push_back(data.at({rand() % data.size(), i}));
 	}
 	Tensor<T> res_tensor = Tensor<T>(res);
@@ -133,11 +137,11 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input) {
 template <typename T>
 Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &background_dataset) {
 	if (input.getRank() != 2) {
-		std::cerr << "Input data must be a 2D tensor" << std::endl;
+		printf("Input data must be a 2D tensor");
 		exit(1);
 	}
 	if (background_dataset.getRank() != 2) {
-		std::cerr << "Background data must be a 2D tensor" << std::endl;
+		printf("Background data must be a 2D tensor");
 		exit(1);
 	}
 
@@ -158,7 +162,7 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 				}
 			}
 			Tensor<T> data_masked(input);
-			Tensor<T> sampled_background = sampleFromData<float>(background_dataset); //fails here
+			Tensor<T> sampled_background = sampleFromData<float>(background_dataset);
 			replaceValues<float>(data_masked, mask, sampled_background);
 
 			auto pred_without_feat_i = model.forward(data_masked);
@@ -168,8 +172,9 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 			}
 			auto pred_with_feat_i = model.forward(data_masked);
 
+			int out_idx = 0; // For now we only support one output
 			for (int i = 0; i < shapley_values.getShape()[0]; ++i) {
-				shapley_values.at({i, feat_i}) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i[i].item() - pred_without_feat_i[i].item());
+				shapley_values.at({i, feat_i}) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i - pred_without_feat_i).at({out_idx, i}); //fails here
 			}
 		}
 	}
@@ -189,11 +194,11 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 template <typename T>
 Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &background_dataset, int n_samples=100){
 	if (input.getRank() != 2) {
-		std::cerr << "Input data must be a 2D tensor" << std::endl;
+		printf("Input data must be a 2D tensor");
 		exit(1);
 	}
 	if (background_dataset.getRank() != 2) {
-		std::cerr << "Background data must be a 2D tensor" << std::endl;
+		printf("Background data must be a 2D tensor");
 		exit(1);
 	}
 

@@ -17,7 +17,7 @@ Tensor<T>::Tensor(std::vector<T> data, std::vector<int> shape) : data(data), sha
         n_data *= s;
     }
     if (data.size() != n_data) {
-        std::cerr << "Creating Tensor failed. Data size does not match tensor size: " + std::to_string(data.size()) + " != " + std::to_string(n_data) << std::endl;
+        printf("Creating Tensor failed. Data size does not match tensor size: %d != %d", data.size(), n_data);
         exit(1);
     }
 }
@@ -32,7 +32,7 @@ Tensor<T>::Tensor(std::vector<std::vector<T>> data) {
     shape = std::vector<int>({static_cast<int>(data.size()), static_cast<int>(data[0].size())});
     for (int i = 1; i < data.size(); i++) {
         if (data[i].size() != data[0].size()) {
-            std::cerr << "Creating Tensor failed. Data rows have different sizes" << std::endl;
+            printf("Creating Tensor failed. Data rows have different sizes");
             exit(1);
         }
     }
@@ -97,7 +97,7 @@ int Tensor<T>::size() const {
 template <typename T>
 void Tensor<T>::setData(std::vector<T> data) {
     if (data.size() != this->data.size()) {
-        std::cerr << "Data size does not match tensor size" << std::endl;
+        printf("Data size does not match tensor size");
         exit(1);
     }
     this->data = data;
@@ -110,7 +110,7 @@ void Tensor<T>::setShape(std::vector<int> shape) {
         n_shape *= s;
     }
     if (n_shape != data.size()) {
-        std::cerr << "Shape does not match data size" << std::endl;
+        printf("Shape does not match data size");
         exit(1);
     }
     this->shape = shape;
@@ -119,7 +119,7 @@ void Tensor<T>::setShape(std::vector<int> shape) {
 template <typename T>
 void Tensor<T>::expandDims(int axis) {
     if (axis < 0 || axis > shape.size()) {
-        std::cerr << "Invalid axis for expandDims" << std::endl;
+        printf("Invalid axis for expandDims");
         exit(1);
     }
     shape.insert(shape.begin() + axis, 1);
@@ -128,7 +128,7 @@ void Tensor<T>::expandDims(int axis) {
 template <typename T>
 Tensor<T> Tensor<T>::transpose() const {
     if (shape.size() != 2) {
-        std::cerr << "Can only transpose 2D tensors" << std::endl;
+        printf("Can only transpose 2D tensors");
         exit(1);
     }
     std::vector<T> result_data;
@@ -146,12 +146,11 @@ Tensor<T> Tensor<T>::matmul(const Tensor<T>& other) const {
     const std::vector<T> other_data = other.getData();
     std::vector<int> other_shape = other.getShape();
     if (shape.size() != 2 || other_shape.size() != 2) {
-        std::cerr << "Can only multiply 2D tensors" << std::endl;
+        printf("Can only multiply 2D tensors");
         exit(1);
     }
     if (shape[1] != other_shape[0]) {
-        std::string desc = "Matrix dimensions do not match for multiplication: ";
-        std::cerr << desc + std::to_string(shape[1]) + " != " + std::to_string(other_shape[0]) << std::endl;
+        printf("Matrix dimensions do not match for multiplication: %d != %d", shape[1], other_shape[0]);
         exit(1);
     }
     std::vector<T> result_data;
@@ -173,7 +172,7 @@ Tensor<T> Tensor<T>::mul(const Tensor<T>& other) const{
     const std::vector<T> other_data = other.getData();
     const std::vector<int> other_shape = other.getShape();
     if (shape != other_shape) {
-        std::cerr << "Tensor shapes do not match for elementwise multiplication" << std::endl;
+        printf("Tensor shapes do not match for elementwise multiplication");
         exit(1);
     }
     std::vector<T> result_data;
@@ -243,8 +242,7 @@ Tensor<T> Tensor<T>::add(const Tensor<T>& other) const {
         result_shape = shape;
     }
     else {
-        std::cerr << "Tensor shapes do not match for addition: " 
-            + std::to_string(shape.size()) + " != " + std::to_string(other_shape.size()) << std::endl;
+        printf("Tensor shapes do not match for addition: %d != %d", shape.size(), other_shape.size());
         exit(1);
     }
     return Tensor(result_data, result_shape);
@@ -268,7 +266,7 @@ template <typename T>
 Tensor<T> Tensor<T>::sub(const Tensor<T>& other) const {
     std::vector<int> other_shape = other.getShape();
     if (shape != other_shape) {
-        std::cerr << "Tensor shapes do not match" << std::endl;
+        printf("Tensor shapes do not match for addition: %d != %d", shape.size(), other_shape.size());
         exit(1);
     }
     std::vector<T> other_data = other.getData();
@@ -305,12 +303,12 @@ Tensor<T> Tensor<T>::pow(const T exponent) const {
 template <typename T>
 Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
     if (index.size() > shape.size()) {
-        std::cerr << "Index dimensions do not match tensor dimensions" << std::endl;
+        printf("Index dimensions do not match tensor dimensions");
         exit(1);
     }
     for (int i = 0; i < index.size(); i++) {
         if (index[i] >= shape[i]) {
-            std::cerr << "Index out of bounds" << std::endl;
+            printf("Index out of bounds");
             exit(1);
         }
     }
@@ -325,7 +323,7 @@ Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
         matrix_size *= result_shape[i];
     }
     int end_index = start_index + matrix_size - 1;
-    //std::cout << start_index << " -> " << end_index << std::endl;
+    //std::cout << start_index << " -> " << end_index);
     std::vector<T> result_data(data.begin() + start_index, data.begin() + end_index + 1);
     return Tensor(result_data, result_shape);
 }
@@ -338,7 +336,7 @@ Tensor<T> Tensor<T>::operator[](const int index) const {
 template <typename T>
 const T& Tensor<T>::at(const std::vector<int> index) const {
     if (index.size() != shape.size()) {
-        std::cerr << "Index dimensions do not match tensor dimensions" << std::endl;
+        printf("Index dimensions do not match tensor dimensions");
         exit(1);
     }
     int flat_index = 0;
@@ -352,7 +350,7 @@ const T& Tensor<T>::at(const std::vector<int> index) const {
 template <typename T>
 T& Tensor<T>::at(const std::vector<int> index) {
     if (index.size() != shape.size()) {
-        std::cerr << "Index dimensions do not match tensor dimensions" << std::endl;
+        printf("Index dimensions do not match tensor dimensions");
         exit(1);
     }
     int flat_index = 0;
@@ -366,7 +364,7 @@ T& Tensor<T>::at(const std::vector<int> index) {
 template <typename T>
 Tensor<T> Tensor<T>::sum(const int axis) const {
     if (axis >= shape.size()) {
-        std::cerr << "Axis out of bounds" << std::endl;
+        printf("Axis out of bounds");
         exit(1);
     }
     std::vector<T> result_data;
@@ -404,7 +402,7 @@ T Tensor<T>::sum() const {
 template <typename T>
 Tensor<T> Tensor<T>::mean(const int axis) const {
     if (axis >= shape.size()) {
-        std::cerr << "Axis out of bounds" << std::endl;
+        printf("Axis out of bounds");
         exit(1);
     }
     Tensor<T> sum = this->sum(axis)/shape[axis];
@@ -419,7 +417,7 @@ T Tensor<T>::mean() const {
 template <typename T>
 T Tensor<T>::item() const {
     if (data.size() != 1) {
-        std::cerr << "Tensor does not have exactly one element" << std::endl;
+        printf("Tensor does not have exactly one element, has %d", data.size());
         exit(1);
     }
     return data[0];
