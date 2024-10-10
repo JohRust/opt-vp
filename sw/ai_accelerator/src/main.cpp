@@ -32,5 +32,10 @@ int main(int argc, char **argv) {
 	printf("%s\n", shapley_values.toString().c_str());
 	printf("Exact Shapley values:\n");
 	printf("%s\n", shapley_values_exact.toString().c_str());
+
+	float expected_value = model.forward(background_data).mean();
+	printf("Expected value: %f\n", expected_value);
+	Tensor<float> pred = model.forward(input_data);
+	printf("Prediction: %f\n", pred.item());
 	return 0;
 }
