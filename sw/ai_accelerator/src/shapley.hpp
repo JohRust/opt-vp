@@ -18,7 +18,7 @@
 template <typename T>
 void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor<T>& newValues) {
     if (mask.size() != newValues.getShape()[0]) {
-		printf("Mask and newValues must have the same length: %d != %d", mask.size(), newValues.getShape()[0]);
+		printf("Mask and newValues must have the same length: %u != %d", mask.size(), newValues.getShape()[0]);
 		exit(1);
 	}
 	if (array.getShape()[1] != mask.size()) {
