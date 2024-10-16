@@ -23,7 +23,6 @@ int main(int argc, char **argv) {
 	linear->setWeights(Tensor<float>({1.0, 2.0, 3.0, 4.0}, {1, 4}));
 	linear->setBiases(Tensor<float>({0.0}, {1}));
 	model.addLayer(linear);
-	//model.addLayer(new nn::ReLU<float>());
 	Tensor<float> input_data({1.0, 2.0, 3.0, 4.0}, {1, 4});
 	Tensor<float> background_data({0.0,0.0,0.0,0.0}, {1, 4});
 	printf("test at: %f\n", (background_data.at({2, 2}))); // should be -1.5
@@ -40,6 +39,8 @@ int main(int argc, char **argv) {
 	float expected_value = model.forward(background_data).mean();
 	printf("Expected value: %f\n", expected_value);
 	Tensor<float> pred = model.forward(input_data);
+	Tensor<float> grad = model.backward(pred);
+	printf("Gradient: %s\n", grad.toString().c_str());
 	printf("Prediction: %f\n", pred.item());
 	return 0;
 }

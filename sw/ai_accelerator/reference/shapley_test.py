@@ -13,8 +13,10 @@ if __name__ == '__main__':
 
     pred = model.forward(torch.Tensor([[1.0, 2.0, 3.0, 4.0]]))
     print("Prediction: ", pred.item())
+    grad = torch.autograd.grad(pred, linear.weight, retain_graph=True)
+    print("Gradient: ", grad[0][0])
     pred.backward()
-    print("Gradients: ", linear.weight.grad)
+    #print("Weight gradient: ", linear.weight.grad)
 
     # Define a simple dataset
     background_data = torch.Tensor([[0.0,0.5,1.0,1.5], [0.0,0.0,0.0,0.0], [0.0,-0.5,-1.0,-1.5]])
@@ -23,6 +25,6 @@ if __name__ == '__main__':
     # Compute the SHAP values
     explainer = shap.GradientExplainer(linear, background_data)
     shap_values = explainer(input_data)
-    print(shap_values.values)
+    print("Shapley Values: ", shap_values.values[0, :, 0])
     print("Expected value: ", model.forward(background_data).mean().item())
     print("Prediction: ", model.forward(input_data).item())
