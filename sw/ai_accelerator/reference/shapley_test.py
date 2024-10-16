@@ -1,3 +1,4 @@
+"""Test some basic SHAP functionality as baseline for the accelerator implementation."""
 import shap
 import numpy as np
 import torch
@@ -9,6 +10,11 @@ if __name__ == '__main__':
     linear.weight = nn.Parameter(torch.tensor([[1.0, 2.0, 3.0, 4.0]]))
     linear.bias = nn.Parameter(torch.tensor([0.0]))
     model = nn.Sequential(linear)
+
+    pred = model.forward(torch.Tensor([[1.0, 2.0, 3.0, 4.0]]))
+    print("Prediction: ", pred.item())
+    pred.backward()
+    print("Gradients: ", linear.weight.grad)
 
     # Define a simple dataset
     background_data = torch.Tensor([[0.0,0.5,1.0,1.5], [0.0,0.0,0.0,0.0], [0.0,-0.5,-1.0,-1.5]])

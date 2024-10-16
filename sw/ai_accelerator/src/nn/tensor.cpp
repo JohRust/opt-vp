@@ -313,18 +313,24 @@ Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
         }
     }
     std::vector<int> result_shape(shape.begin() + index.size(), shape.end());
-    int start_index = 0;
-    for (int i = 0; i < index.size(); i++) {
-        start_index *= shape[i];
-        start_index += index[i];
-    }
     int matrix_size = 1;
     for (int i = 0; i < result_shape.size(); i++) {
         matrix_size *= result_shape[i];
     }
-    int end_index = start_index + matrix_size - 1;
-    //std::cout << start_index << " -> " << end_index);
-    std::vector<T> result_data(data.begin() + start_index, data.begin() + end_index + 1);
+
+    std::vector<T> result_data;
+    for (int i = 0; i < matrix_size; i++) {
+        std::vector<int> current_index = index;
+        for (int j = 0; j < result_shape.size(); j++) {
+            current_index.push_back(i % result_shape[j]);
+        }
+        int flat_index = 0;
+        for (int j = 0; j < current_index.size(); j++) {
+            flat_index *= shape[j];
+            flat_index += current_index[j];
+        }
+        result_data.push_back(data[flat_index]);
+    }
     return Tensor(result_data, result_shape);
 }
 
