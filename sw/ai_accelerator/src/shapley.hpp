@@ -134,8 +134,17 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input) {
 	return explainPrediction(input, model, bgData);
 }
 
+
+/**
+ * Explains the prediction of the model by calculating the Shapley value of every value in the input data.
+ * 
+ * @param module The module to be used for prediction.
+ * @param input The input data tensor.
+ * @param background_dataset The background dataset tensor.
+ * @return The tensor to store the Shapley values in.
+ */
 template <typename T>
-Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &background_dataset) {
+Tensor<T> exact_shap(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &background_dataset) {
 	if (input.getRank() != 2) {
 		printf("Input data must be a 2D tensor");
 		exit(1);
@@ -165,12 +174,12 @@ Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input, Tensor<T> &backgrou
 			Tensor<T> sampled_background = sampleFromData<float>(background_dataset);
 			replaceValues<float>(data_masked, mask, sampled_background);
 
-			auto pred_without_feat_i = model.forward(data_masked);
+			auto pred_without_feat_i = module.forward(data_masked);
 
 			for (int i = 0; i < data_masked.getShape()[0]; ++i) {
 				data_masked.at({i, feat_i}) = input.at({i, feat_i});
 			}
-			auto pred_with_feat_i = model.forward(data_masked);
+			auto pred_with_feat_i = module.forward(data_masked);
 
 			int out_idx = 0; // For now we only support one output
 			for (int i = 0; i < shapley_values.getShape()[0]; ++i) {
