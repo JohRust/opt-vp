@@ -235,8 +235,6 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		Tensor<T> temp_sample = random_sample + (input_minus_random * alpha);
 		temp_sample.expandDims(0);
 		Tensor<T> pred_current = module.forward(temp_sample);
-		//Tensor<T> current_grad = module.backward(pred_current); // This should be right. See https://www.tensorflow.org/tutorials/interpretability/integrated_gradients#compute_gradients
-		
 		//We want to calculate the gradient of the output with respect to the input, not the gradient of the loss with respect to the input.
 		//So we can just pass in a tensor of ones as the gradOutput.
 		Tensor<T> current_grad = module.backward(Tensor<T>({1}, pred_current.getShape()));
