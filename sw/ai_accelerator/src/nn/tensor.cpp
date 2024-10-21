@@ -67,9 +67,9 @@ Tensor<T> Tensor<T>::normal(std::vector<int> shape, T mean, T std) {
     for (auto s : shape) {
         n_data *= s;
     }
-    std::vector<T> data;
+    std::vector<T> data(n_data);
     for (int i = 0; i < n_data; i++) {
-        data.push_back(dist(gen));
+        data[i] = dist(gen);
     }
     return Tensor<T>(data, shape);
 }
@@ -132,6 +132,7 @@ Tensor<T> Tensor<T>::transpose() const {
         exit(1);
     }
     std::vector<T> result_data;
+    result_data.reserve(data.size());
     std::vector<int> result_shape = {shape[1], shape[0]};
     for (int i = 0; i < shape[1]; i++) {
         for (int j = 0; j < shape[0]; j++) {
@@ -154,6 +155,7 @@ Tensor<T> Tensor<T>::matmul(const Tensor<T>& other) const {
         exit(1);
     }
     std::vector<T> result_data;
+    result_data.reserve(shape[0] * other_shape[1]);
     std::vector<int> result_shape = {shape[0], other_shape[1]};
     for (int i = 0; i < shape[0]; i++) {
         for (int j = 0; j < other_shape[1]; j++) {
@@ -175,9 +177,9 @@ Tensor<T> Tensor<T>::mul(const Tensor<T>& other) const{
         printf("Tensor shapes do not match for elementwise multiplication");
         exit(1);
     }
-    std::vector<T> result_data;
+    std::vector<T> result_data(data);
     for (int i = 0; i < data.size(); i++) {
-        result_data.push_back(data[i] * other_data[i]);
+        result_data[i] *= other_data[i];
     }
     return Tensor(result_data, shape);
 }
@@ -255,9 +257,9 @@ Tensor<T> Tensor<T>::operator+(const Tensor<T>& other) const {
 
 template <typename T>
 Tensor<T> Tensor<T>::operator+(const T scalar) const {
-    std::vector<T> result_data;
-    for (int i = 0; i < data.size(); i++) {
-        result_data.push_back(data[i] + scalar);
+    std::vector<T> result_data(data);
+    for (T& d : result_data) {
+        d += scalar;
     }
     return Tensor(result_data, shape);
 }
@@ -270,9 +272,9 @@ Tensor<T> Tensor<T>::sub(const Tensor<T>& other) const {
         exit(1);
     }
     std::vector<T> other_data = other.getData();
-    std::vector<T> result_data;
+    std::vector<T> result_data(data);
     for (int i = 0; i < data.size(); i++) {
-        result_data.push_back(data[i] - other_data[i]);
+        result_data[i] -= other_data[i];
     }
     return Tensor(result_data, shape);
 }
@@ -284,9 +286,9 @@ Tensor<T> Tensor<T>::operator-(const Tensor& other) const {
 
 template <typename T>
 Tensor<T> Tensor<T>::operator-(T scalar) const {
-    std::vector<T> result_data;
-    for (int i = 0; i < data.size(); i++) {
-        result_data.push_back(data[i] - scalar);
+    std::vector<T> result_data(data);
+    for (T& d : result_data) {
+        d -= scalar;
     }
     return Tensor(result_data, shape);
 }
@@ -318,7 +320,7 @@ Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
         matrix_size *= result_shape[i];
     }
 
-    std::vector<T> result_data;
+    std::vector<T> result_data(matrix_size);
     for (int i = 0; i < matrix_size; i++) {
         std::vector<int> current_index = index;
         for (int j = 0; j < result_shape.size(); j++) {
@@ -329,7 +331,7 @@ Tensor<T> Tensor<T>::operator[](const std::vector<int> index) const {
             flat_index *= shape[j];
             flat_index += current_index[j];
         }
-        result_data.push_back(data[flat_index]);
+        result_data[i] = data[flat_index];
     }
     return Tensor(result_data, result_shape);
 }
