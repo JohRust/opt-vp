@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 	
 	// Build a sequential model
 	nn::Sequential<float> model;
-	nn::Linear<float> *linear = new nn::Linear<float>(4, 1);
+	nn::Linear<float> *linear = new nn::Linear<float>(4, 2);
 	linear->setWeights(Tensor<float>({1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0}, {2, 4}));
 	linear->setBiases(Tensor<float>({0.0, 0.0}, {2}));
 	model.addLayer(linear);
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 	printf("Exact Shapley values:\n");
 	printf("%s\n", shapley_values_exact.toString().c_str());
 
-	Tensor<float> preds = model.forward(background_data);
+	Tensor<float> preds = model.forward(input_data);
 	printf("Predictions: %s\n", preds.toString().c_str());
 	float expected_value = model.forward(background_data).mean();
 	printf("Expected value: %f\n", expected_value);
