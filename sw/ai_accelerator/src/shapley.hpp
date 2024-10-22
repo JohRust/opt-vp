@@ -238,7 +238,7 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		//We want to calculate the gradient of the output with respect to the input, not the gradient of the loss with respect to the input.
 		//So we can just pass in a tensor of ones as the gradOutput.
 		Tensor<T> current_grad = module.backward(Tensor<T>({1}, pred_current.getShape()));
-		printf("Random Idx: %u, input_minus_random: %s, Current grad: %s, temp_sample: %s\n", random_index, input_minus_random.toString().c_str(), current_grad.toString().c_str(), temp_sample.toString().c_str());
+		//printf("Random Idx: %u, input_minus_random: %s, Current grad: %s, temp_sample: %s\n", random_index, input_minus_random.toString().c_str(), current_grad.toString().c_str(), temp_sample.toString().c_str());
 		input_minus_random.expandDims(0);
 		grads = grads + input_minus_random.mul(current_grad);
 	}
