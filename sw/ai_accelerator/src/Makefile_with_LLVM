@@ -11,7 +11,7 @@ RISCV_PREFIX ?= riscv32-unknown-elf-
 
 override CC = $(RISCV_PREFIX)clang
 override CXX = $(RISCV_PREFIX)clang++
-override LD = lld.ld
+override LD = $(RISCV_PREFIX)clang++
 
 ASFLAGS ?= $(CFLAGS)
 SIM_TARGET ?= sim-default
