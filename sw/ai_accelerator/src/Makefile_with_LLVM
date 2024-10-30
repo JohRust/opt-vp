@@ -4,7 +4,7 @@ OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wil
 
 CFLAGS   = -march=rv32imaf -mabi=ilp32f -g
 CXXFLAGS = -march=rv32imaf -mabi=ilp32f -g
-LDFLAGS  = -nostartfiles -Wl,--no-relax
+LDFLAGS  = -nostartfiles -Wl,--no-relax -static
 
 ########################################################################
 RISCV_PREFIX ?= riscv32-unknown-elf-
@@ -26,7 +26,7 @@ EXECUTABLE ?= main
 OBJECTS ?= main.o
 
 $(EXECUTABLE): $(OBJECTS)
-	$(LD) $(CXXFLAGS) $(CFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+	$(LD) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 %.o: %.S
 	$(CC) $(CPPFLAGS) $(ASFLAGS) -c $< -o $@
