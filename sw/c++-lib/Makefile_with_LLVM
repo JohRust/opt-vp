@@ -1,0 +1,10 @@
+LD       = riscv32-unknown-elf-clang++
+OBJECTS  = main.o
+CXXFLAGS = -march=rv32imaf -mabi=ilp32f
+
+include ../Makefile.common
+override CXX = $(RISCV_PREFIX)clang++
+override CXXFLAGS = -march=rv32imaf -mabi=ilp32f -g'
+override CFLAGS = ""
+override LDFLAGS = static
+override LD = $(CXX)
