@@ -18,10 +18,10 @@ void *__dso_handle = 0;
 
 int main(int argc, char **argv) {
 	init_dma();
-	
 	// Build a sequential model
+	printf("Building model\n");
 	nn::Sequential<float> model;
-	nn::Linear<float> *linear = new nn::Linear<float>(4, 2);
+	nn::Linear<float> *linear = new nn::Linear<float>(4, 2); // Stops here
 	linear->setWeights(Tensor<float>({1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0}, {2, 4}));
 	linear->setBiases(Tensor<float>({0.0, 0.0}, {2}));
 	model.addLayer(linear);

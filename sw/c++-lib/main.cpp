@@ -25,6 +25,10 @@ struct B : public A {
 };
 
 int main() {
+	float af = 1.0;
+	float bf = 2.0;
+	float cf = af * bf;
+
 	std::cout << "Hello World\n";
 	B x(5, 2);
 	auto a = x.foo();
