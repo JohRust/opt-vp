@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
-#include <random>
 #include <vector>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 #include "nn/module.hpp"
 #include "nn/tensor.hpp"
@@ -190,6 +191,23 @@ Tensor<T> exact_shap(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &backgro
 	return shapley_values;
 }
 
+/***
+ * Generate a random number between min and max (inclusive)
+ * 
+ * @param min The minimum value of the random number.
+ * @param max The maximum value of the random number.
+ * @return The random number generated.
+ */
+int generate_random(int min, int max);
+
+/**
+ * Generates a random float between min and max.
+ * 
+ * @param min The minimum value of the random number.
+ * @param max The maximum value of the random number.
+ * @return The random number generated.
+ */
+float generate_random_float(float min, float max);
 
 /**
  * Calculates the expected gradients of the model with respect to the input data.
@@ -211,12 +229,7 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		exit(1);
 	}
 
-	// Create uniform distribution generator
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<T> alpha_dist(0, 1);
-	// Create a generator to select a random sample from the background dataset
-	std::uniform_int_distribution<int> index_dist(0, background_dataset.getShape()[0] - 1);
+	srand(time(NULL));
 	// Create a tensor to store the expected gradients
 	Tensor<T> grads = Tensor<T>::zeros(input.getShape());
 	Tensor<T> input_pred = module.forward(input);
@@ -227,9 +240,9 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 
 	const Tensor<T> input_i = input[0]; //For now we only support one sample, but expect the input to be a 2D tensor
 	for (int i = 0; i < n_samples; i++) {
-		float alpha = alpha_dist(gen);
+		float alpha = generate_random_float(0.0, 1.0);
 		// Select a random sample from the background dataset
-		int random_index = index_dist(gen);
+		int random_index = generate_random(0, background_dataset.getShape()[0] - 1);
 		const Tensor<T> random_sample = background_dataset[{random_index}];
 		Tensor<T> input_minus_random = input_i - random_sample;
 		Tensor<T> temp_sample = random_sample + (input_minus_random * alpha);
