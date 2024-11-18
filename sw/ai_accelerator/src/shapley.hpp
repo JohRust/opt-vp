@@ -229,7 +229,9 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		exit(1);
 	}
 
-	srand(time(NULL));
+	//srand(time(NULL));
+	srand(42);
+
 	// Create a tensor to store the expected gradients
 	Tensor<T> grads = Tensor<T>::zeros(input.getShape());
 	Tensor<T> input_pred = module.forward(input);
