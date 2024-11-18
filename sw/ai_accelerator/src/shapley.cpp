@@ -1,5 +1,5 @@
 #include "shapley.hpp"
-
+#include "random.hpp"
 extern "C" {
 	#include "syscall.h"
 }
@@ -72,14 +72,6 @@ std::vector<bool> getAsBoolVector(uint32_t n, uint16_t length) {
 		}
 	}
 	return res;
-}
-
-int generate_random(int min, int max) {
-    return min + rand() % (max - min + 1);
-}
-
-float generate_random_float(float min, float max) {
-	return min + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(max-min)));
 }
 
 std::vector<float> explainPrediction(std::vector<float> input_data, float (func)(const float*, unsigned int)) {

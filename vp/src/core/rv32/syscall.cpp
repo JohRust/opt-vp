@@ -249,15 +249,6 @@ int SyscallHandler::execute_syscall(uint64_t n, uint64_t _a0, uint64_t _a1, uint
 		case SYS_host_error:
 			throw std::runtime_error("SYS_host_error");
 
-		case SYS_host_test_pass:
-			std::cout << "TEST_PASS" << std::endl;
-			shall_exit = true;
-			return 0;
-
-		case SYS_host_test_fail:
-			std::cout << "TEST_FAIL (testnum = " << _a0 << ")" << std::endl;
-			shall_exit = true;
-			return 0;
 		case SYS_zero:
 			std::cout << "ZERO syscall" << std::endl;
 			return 0;

@@ -2,9 +2,10 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <random>
+#include <stdlib.h>
 
 #include "tensor.hpp"
+#include "../random.hpp"
 
 template <typename T>
 Tensor<T>::Tensor() : data(std::vector<T>()), shape(std::vector<int>()) {
@@ -60,16 +61,13 @@ Tensor<T> Tensor<T>::zeros(std::vector<int> shape) {
 
 template <typename T>
 Tensor<T> Tensor<T>::normal(std::vector<int> shape, T mean, T std) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::normal_distribution<float> dist(mean, std);
     uint32_t n_data = 1;
     for (auto s : shape) {
         n_data *= s;
     }
     std::vector<T> data(n_data);
     for (int i = 0; i < n_data; i++) {
-        data[i] = dist(gen);
+        data[i] = generate_random_normal(mean, std);
     }
     return Tensor<T>(data, shape);
 }

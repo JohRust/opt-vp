@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
 	Tensor<float> input_data({1.0, 2.0, 3.0, 4.0}, {1, 4});
 	Tensor<float> background_data({0.0,0.0,0.0,0.0}, {1, 4});
-	printf("test at: %f\n", (input_data.at({0,3}))); // should be 4.0
+	//printf("test at: %f\n", (input_data.at({0,3}))); // should be 4.0
 	printf("test: %s\n", (input_data[0]).toString().c_str());
 	Tensor<float> shapley_values = expected_gradients<float>(model, input_data, background_data, 50);
 	Tensor<float> shapley_values_exact = exact_shap<float>(model, input_data, background_data);

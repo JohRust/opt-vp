@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 
+#include "random.hpp"
 #include "nn/module.hpp"
 #include "nn/tensor.hpp"
 //#include "../ai_caller.h"
@@ -190,24 +191,6 @@ Tensor<T> exact_shap(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &backgro
 	}
 	return shapley_values;
 }
-
-/***
- * Generate a random number between min and max (inclusive)
- * 
- * @param min The minimum value of the random number.
- * @param max The maximum value of the random number.
- * @return The random number generated.
- */
-int generate_random(int min, int max);
-
-/**
- * Generates a random float between min and max.
- * 
- * @param min The minimum value of the random number.
- * @param max The maximum value of the random number.
- * @return The random number generated.
- */
-float generate_random_float(float min, float max);
 
 /**
  * Calculates the expected gradients of the model with respect to the input data.

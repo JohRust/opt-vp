@@ -4,8 +4,8 @@
 
 template <typename T>
 nn::Linear<T>::Linear(int inputSize, int outputSize) {
-    weights = Tensor<T>::normal({outputSize, inputSize});
-    biases = Tensor<T>::normal({outputSize});
+    weights = Tensor<T>::zeros({outputSize, inputSize});
+    biases = Tensor<T>::zeros({outputSize});
     gradWeights = Tensor<T>::zeros({outputSize, inputSize});
     gradBiases = Tensor<T>::zeros({outputSize});
 }

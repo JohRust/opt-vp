@@ -1,4 +1,4 @@
-OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
+OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o random.o
 # All object files in nn directory
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
