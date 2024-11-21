@@ -183,7 +183,7 @@ int sc_main(int argc, char **argv) {
 	core.output_as_dot = opt.output_as_dot;
 	core.output_as_csv = opt.output_as_csv;
 	core.output_as_json = opt.output_as_json;
-
+	core.interactive_mode = opt.interactive_mode;
 
 	// address mapping
 	{
