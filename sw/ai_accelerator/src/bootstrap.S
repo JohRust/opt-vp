@@ -33,6 +33,12 @@ li t1, -1
 sw t1, 0(t0)
 sw t1, 4(t0)
 
+# Enable the FPU by setting the FS (Floating-Point Status) field in mstatus
+#csrr a0, mstatus
+#li a1, 0x00006000  # Set FS field to 11 (Dirty)
+#or a0, a0, a1
+#csrw mstatus, a0
+
 jal main
 
 # call exit (SYS_EXIT=93) with exit code 0 (argument in a0)
