@@ -22,6 +22,9 @@
 #define trace_pcs
 #define log_pcs
 //#define debug_register_dependencies
+//#define debug_dependencies
+
+//#define dot_pc_on_pruned_nodes
 
 // extern std::array<const char*, NUMBER_OF_INSTRUCTIONS> mappingStr;
 
@@ -89,7 +92,7 @@ struct ScoreParams {
 	Opcode::Mapping tree; 
 	uint64_t weight; 
 	uint32_t length; 
-	float dep_score;
+	double dep_score;
 	uint32_t num_children;
 	uint32_t inputs;
 	uint32_t outputs; 
@@ -236,11 +239,11 @@ struct CsvParams {
 };
 
 struct PathExtensionParams {
-    uint32_t length;
+    int32_t length;
     float score_bonus;
     float score_multiplier;
     int32_t tree_id;
-    int force_extension_depth;
+    int32_t force_extension_depth;
     Opcode::Mapping force_instruction;
 	std::function <float(const ScoreParams)> score_function;
 };
@@ -249,7 +252,7 @@ struct BranchingPoint
 {
 	uint8_t depth = 0;
 	Opcode::Mapping instruction = Opcode::UNDEF;
-	uint64_t weight = 0;
+	int64_t weight = 0;
 	double ratio = 0.0;
 	InstructionNode* starting_point;
 };
@@ -701,7 +704,7 @@ class InstructionNode{
 
 		//find a point in an existing sequence with the highest ratio between branch taken in the original sequence 
 		// and another possible branch not taken, which would lead to a different sequence 
-		virtual std::vector<BranchingPoint> find_variant_branch(Path path, uint depth){
+		virtual std::vector<BranchingPoint> find_variant_branch(Path path, uint8_t depth){
 			return {}; //no possible branching points for leaf nodes
 		}
 
@@ -723,7 +726,9 @@ class InstructionNodeR : virtual public InstructionNode{
 		std::list<InstructionNode*> children;
 
 		void insert_rb(std::array<ExecutionInfo, INSTRUCTION_TREE_DEPTH> last_executed_instructions, 
-						uint8_t next_rb_index);
+						uint32_t next_rb_index);
+		void insert_rb(std::array<ExecutionInfo, INSTRUCTION_TREE_DEPTH> last_executed_instructions, 
+						uint32_t next_rb_index, uint32_t offset);
 
 		InstructionNode* insert(const StepInsertInfo& p) override;
 
@@ -747,7 +752,7 @@ class InstructionNodeR : virtual public InstructionNode{
 		std::map<uint64_t, int> get_pc() override;
 
 		std::vector<PathNode> path_to_path_nodes(Path path, uint depth) override; 
-		std::vector<BranchingPoint> find_variant_branch(Path path, uint depth) override;
+		std::vector<BranchingPoint> find_variant_branch(Path path, uint8_t depth) override;
 		int prune_tree(uint64_t weight_threshold, uint8_t depth) override;
 		NODE_TYPE get_node_type() override;
 };

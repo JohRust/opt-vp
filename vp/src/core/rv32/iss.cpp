@@ -159,40 +159,44 @@ void ISS::exec_step() {
 	if(record_traces){
 		uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
 
-		#ifdef USE_INDIVIDUAL_ARRAYS
-		last_executed_instructions[ring_buffer_index] = op;
-		last_registers[ring_buffer_index] = {RS1,RS2,RD};
-		//printf("Last regs:%d, %d -> %d\n", std::get<0>(last_registers[ring_buffer_index]), std::get<1>(last_registers[ring_buffer_index]), std::get<2>(last_registers[ring_buffer_index]));
-		last_executed_pc[ring_buffer_index] = pc;
-		last_cycles[ring_buffer_index] = cycles_diff;
-		#else
-			last_executed_steps[ring_buffer_index].last_executed_instruction = op;
-			last_executed_steps[ring_buffer_index].last_cycles = cycles_diff;
-			last_executed_steps[ring_buffer_index].last_registers = {RS1,RS2,RD};
-			last_executed_steps[ring_buffer_index].last_executed_pc = last_pc;
-			last_executed_steps[ring_buffer_index].last_powermode = 0; //TODO
-			last_executed_steps[ring_buffer_index].last_memory_read = 0;
-			last_executed_steps[ring_buffer_index].last_memory_written = 0;
-			// if(std::get<1>(last_memory_access)==AccessType::STORE){
-			// 	last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access);
-			// 	if(last_executed_steps[ring_buffer_index].last_memory_written==0){
-			// 		printf("ERROR ZERO write\n\n\n");
-			// 	}
-			// }else{
-			// 	if(std::get<1>(last_memory_access)==AccessType::LOAD)
-			// 	{
-			// 	   printf("LOAD: %s\n", Opcode::mappingStr[op]);
-			// 	   last_executed_steps[ring_buffer_index].last_memory_read = std::get<0>(last_memory_access);
-			// 	}
-				
-			// }
-			last_executed_steps[ring_buffer_index].last_step_id = total_num_instr;
-		#endif
+//Instead of updateing the entry at the start of the loop with data from the last iteration
+//move this part to the end as memory accesses have to be calculated first
+//otherwise memory accesses are off by 1
+// //---------------------------------------------------------------------------------
+// //                             save instruction info of last execution
+// //---------------------------------------------------------------------------------
+// 		last_executed_steps[ring_buffer_index].last_executed_instruction = op;
+// 		last_executed_steps[ring_buffer_index].last_cycles = cycles_diff;
+// 		last_executed_steps[ring_buffer_index].last_registers = {RS1,RS2,RD};
+// 		last_executed_steps[ring_buffer_index].last_executed_pc = last_pc;
+// 		last_executed_steps[ring_buffer_index].last_powermode = 0; //TODO
+// 		last_executed_steps[ring_buffer_index].last_memory_read = 0;
+// 		last_executed_steps[ring_buffer_index].last_memory_written = 0;
+// 		last_executed_steps[ring_buffer_index].last_step_id = total_num_instr;
 
-		last_memory_access = {0, AccessType::NONE};//reset last memory access
-		//updating ringbuffer done
-		//update index
-		ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
+// 		if(std::get<1>(last_memory_access)==AccessType::STORE){//check if memory was accessed in the last execution step
+// 			last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access); //fetch accessed addresses from persistent variable
+// 			if(last_executed_steps[ring_buffer_index].last_memory_written==0){
+// 				printf("ERROR ZERO write\n\n\n");
+// 			}
+// 			printf("WRITE %x (%s at idx:%d)\n",last_executed_steps[ring_buffer_index].last_memory_written, Opcode::mappingStr[op], ring_buffer_index);
+// 		}else{
+// 			if(std::get<1>(last_memory_access)==AccessType::LOAD)
+// 			{
+// 			//    printf("LOAD: %s\n", Opcode::mappingStr[op]);
+// 			   last_executed_steps[ring_buffer_index].last_memory_read = std::get<0>(last_memory_access);
+// 			   printf("LOAD %x, (%s at idx:%d)\n", last_executed_steps[ring_buffer_index].last_memory_read, Opcode::mappingStr[op], ring_buffer_index);
+// 			}
+			
+// 		}
+// 		last_memory_access = {0, AccessType::NONE};//reset last memory access
+
+// //-------------------------------------------------------------------------
+// //                          
+// //-------------------------------------------------------------------------
+// 	//updating ringbuffer done
+// 	//update index
+// 	ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
 
 		//insert into tree of oldest instruction, which will be overwritten in the next step
 		Opcode::Mapping oldest_op = last_executed_steps[ring_buffer_index].last_executed_instruction;
@@ -1291,21 +1295,46 @@ void ISS::exec_step() {
             throw std::runtime_error("unknown opcode");
 	}
 
-	if (record_traces) {
-		if(std::get<1>(last_memory_access)==AccessType::STORE){
-			last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access);
+//---------------------------------------------------------------------------------
+//                             save instruction info of last execution
+//---------------------------------------------------------------------------------
+		last_executed_steps[ring_buffer_index].last_executed_instruction = op;
+		last_executed_steps[ring_buffer_index].last_cycles = cycles_diff;
+		last_executed_steps[ring_buffer_index].last_registers = {RS1,RS2,RD};
+		last_executed_steps[ring_buffer_index].last_executed_pc = last_pc;
+		last_executed_steps[ring_buffer_index].last_powermode = 0; //TODO
+		last_executed_steps[ring_buffer_index].last_memory_read = 0;
+		last_executed_steps[ring_buffer_index].last_memory_written = 0;
+		last_executed_steps[ring_buffer_index].last_step_id = total_num_instr;
+
+		if(std::get<1>(last_memory_access)==AccessType::STORE){//check if memory was accessed in the last execution step
+			last_executed_steps[ring_buffer_index].last_memory_written = std::get<0>(last_memory_access); //fetch accessed addresses from persistent variable
 			if(last_executed_steps[ring_buffer_index].last_memory_written==0){
 				printf("ERROR ZERO write\n\n\n");
 			}
+			#ifdef debug_dependencies
+			printf("WRITE %lx (%s at idx:%d)\n",last_executed_steps[ring_buffer_index].last_memory_written, Opcode::mappingStr[op], ring_buffer_index);
+			#endif
 		}else{
 			if(std::get<1>(last_memory_access)==AccessType::LOAD)
 			{
 			//    printf("LOAD: %s\n", Opcode::mappingStr[op]);
 			   last_executed_steps[ring_buffer_index].last_memory_read = std::get<0>(last_memory_access);
+			   #ifdef debug_dependencies
+			   printf("LOAD %lx, (%s at idx:%d)\n", last_executed_steps[ring_buffer_index].last_memory_read, Opcode::mappingStr[op], ring_buffer_index);
+			   #endif
 			}
 			
 		}
-	}
+		last_memory_access = {0, AccessType::NONE};//reset last memory access
+
+//-------------------------------------------------------------------------
+//                          
+//-------------------------------------------------------------------------
+	//updating ringbuffer done
+	//update index
+	ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
+
 }
 
 uint64_t ISS::_compute_and_get_current_cycles() {
@@ -2025,6 +2054,43 @@ struct LoadedLibrary {
     std::array<ScoreFunction, SF_BATCH_SIZE> functions;
 };
 
+void ISS::flush_ringbuffer(){
+	for (size_t offset = 1; offset < INSTRUCTION_TREE_DEPTH; offset++) //TODO check if this has to start at index 0
+	{
+		ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
+
+		//advance ringbuffer index and insert current instruction into tree (as if it were the oldest entry)
+		Opcode::Mapping oldest_op = last_executed_steps[ring_buffer_index].last_executed_instruction;
+		if(oldest_op){//ring buffer was not completely filled - just skip this entry 
+			//check if a tree for this op already exists
+			InstructionNodeR* found_tree = NULL;
+			for (InstructionNodeR& root : instruction_trees){
+				
+				if(root.instruction == oldest_op){
+					found_tree = &root;
+					break;
+				}
+			}
+			if(found_tree!=NULL){
+			}else{
+				// printf("first occurance of op %d during flush\n", oldest_op);
+				instruction_trees.emplace_back(oldest_op, 0);
+				found_tree = &instruction_trees.back();
+			}
+			//printf("flush: inserting with offset %d\n", offset);
+
+			//insert ringbuffer - this opcode into tree
+			found_tree->insert_rb(last_executed_steps, 
+								ring_buffer_index, offset);
+		}
+		// else{
+		// 	printf("flush: skipping empty entry at offset %d\n", offset);
+		// }
+	}
+	
+	
+}
+
 LoadedLibrary load_scoring_functions(const std::string& libraryPath){
 	void* library = dlmopen(-1, libraryPath.c_str(), RTLD_NOW); // | RTLD_GLOBAL
 	std::cout << "Loading library from: " << libraryPath << std::endl;
@@ -2177,7 +2243,7 @@ void ISS::output_csv(std::streambuf *cout_save){
 			std::string single_output_filename = "";
 
 			std::string file_path = std::string(input_filename);
-			std::string application_name = file_path.substr(file_path.find_last_of("\//")+1);
+			std::string application_name = file_path.substr(file_path.find_last_of("/\\")+1);
 			
 			std::cout << "writing csv files to directory " << output_filename << std::endl;
 			single_output_filename = output_filename + 
@@ -2323,7 +2389,7 @@ void ISS::output_json(std::streambuf *cout_save,
 			std::cout << "writing json to directory " << output_filename << std::endl;
 
 			std::string file_path = std::string(input_filename);
-			std::string application_name = file_path.substr(file_path.find_last_of("\//")+1);
+			std::string application_name = file_path.substr(file_path.find_last_of("/\\")+1);
 
 			single_output_filename = output_filename + 
 									std::string("sequences_") + 
@@ -2380,6 +2446,7 @@ void ISS::output_full(std::streambuf *cout_save){
 }
 
 void ISS::show() {
+	flush_ringbuffer();//insert all instructions currently in the ringbuffer into their trees
 	boost::io::ios_flags_saver ifs(std::cout);
 	std::cout << "=[ core : " << csrs.mhartid.reg << " ]===========================" << std::endl;
 	std::cout << "simulation time: " << sc_core::sc_time_stamp() << std::endl;
@@ -2387,7 +2454,8 @@ void ISS::show() {
 	std::cout << "pc = " << std::hex << pc << std::endl;
 	std::cout << "num-instr = " << std::dec << csrs.instret.reg << std::endl;
 
-	std::cout << "execution statistics: (" << instruction_trees.size() << ")" << std::endl;
+	std::cout << "==========================\n==========================\n";
+	std::cout << "execution statistics: (" << instruction_trees.size() << " Trees)" << std::endl;
 
 	//std::ostream output = std::cout;
 	std::streambuf *cout_save = std::cout.rdbuf();
@@ -2526,176 +2594,190 @@ void ISS::show() {
 	}
 
 	
-	//print some additional info
+	float total_percent = 1.0;
+	if(discovered_sequences.empty()){
+		printf("[Warning] Ringbuffer was not filled at least once. \nThis means, the whole program fits into one sequence. \nYou probably want to execute a longer program or decrease the tree bound.\n");
 
-	float total_percent = (float)discovered_sequences.back().minimum_weight * (float)discovered_sequences.back().length / (float)csrs.instret.reg;
-	std::cout << "inverse dependency score " << discovered_sequences.back().inverse_dependency_score << std::endl;
-	std::cout << "partially normalized potential " << discovered_sequences.back().get_normalized_score() << std::endl;
-	std::cout << "normalized potential " << discovered_sequences.back().get_normalized_score() * total_percent * 100 << std::endl;
-
-	std::list<Opcode::Mapping> unused_instructions; 
-	for (size_t i = Opcode::Mapping::ADD; i < Opcode::Mapping::NUMBER_OF_INSTRUCTIONS; i++)
-	{
-		Opcode::Mapping c_op = (Opcode::Mapping)i;
-		bool found = false;
-		for (InstructionNodeR& tree : instruction_trees){
-			if(tree.instruction == c_op){
-				found = true;
-			}
-		}
-		if(!found){
-			unused_instructions.emplace_back(c_op);
-		}
-	}
-	std::cout << "\n[Unused Instructions]" << std::endl;
-	if(unused_instructions.size()>0){
-		// for (auto &&unused_ins : unused_instructions)
-		// {
-		// 	std::cout << Opcode::mappingStr[unused_ins] << std::endl;
-		// }
-		std::cout << unused_instructions.size() << std::endl;
 	}else{
-		std::cout << "- NONE -" << std::endl;
-	}
+		//print some additional info
+		total_percent = (float)discovered_sequences.back().minimum_weight * (float)discovered_sequences.back().length / (float)csrs.instret.reg;
+		std::cout << "inverse dependency score " << discovered_sequences.back().inverse_dependency_score << std::endl;
+		std::cout << "partially normalized potential " << discovered_sequences.back().get_normalized_score() << std::endl;
+		std::cout << "normalized potential " << discovered_sequences.back().get_normalized_score() * total_percent * 100 << std::endl;
 
-
-	//evaluate additional score functions
-	LoadedLibrary sf_lib = load_scoring_functions("./vp/build/lib/libfunctions.so");
-	std::array<ScoreFunction, SF_BATCH_SIZE> score_functions;
-	if(sf_lib.handle){
-		if(sf_lib.functions.size() > 0){//TODO 
-			score_functions = sf_lib.functions;
-
-			 // Access the score_functions array and call the functions
-			std::cout << "Testing loaded score functions: " << std::endl;
-			for (const auto& func : score_functions) {
-				std::cout << "Test Score: " << func({Opcode::Mapping::ADD, Opcode::Mapping::ADD, 100, 8, 0, 3, 2, 1, 1, 0}) << std::endl;
+		std::list<Opcode::Mapping> unused_instructions; 
+		for (size_t i = Opcode::Mapping::ADD; i < Opcode::Mapping::NUMBER_OF_INSTRUCTIONS; i++)
+		{
+			Opcode::Mapping c_op = (Opcode::Mapping)i;
+			bool found = false;
+			for (InstructionNodeR& tree : instruction_trees){
+				if(tree.instruction == c_op){
+					found = true;
+				}
 			}
-
+			if(!found){
+				unused_instructions.emplace_back(c_op);
+			}
+		}
+		std::cout << "\n[Unused Instructions]" << std::endl;
+		if(unused_instructions.size()>0){
+			// for (auto &&unused_ins : unused_instructions)
 			// {
-			//     [](ScoreParams p) -> float {
-			// 		float score = ((p.length * p.weight) * p.score_multiplier 
-			// 			+ p.weight * p.score_bonus); //length * minimum_weight;
-			// 		return score;
-			// 	},
-			//     [](ScoreParams p) -> float {
-			// 		float score = ((p.length * p.weight) * p.score_multiplier 
-			// 			+ p.weight * p.score_bonus) / (1 + p.dep_score); 
-			// 		return score;
-			// 	},
-			//     [](ScoreParams p) -> float {
-			// 		float score = ((p.length * p.weight) * p.score_multiplier 
-			// 			+ p.weight * p.score_bonus) * (p.num_children + 1);
-			// 		return score;
-			// 	}
-			// };
+			// 	std::cout << Opcode::mappingStr[unused_ins] << std::endl;
+			// }
+			std::cout << unused_instructions.size() << std::endl;
 		}else{
-			std::cout << "Error loading scoring functions from library\nSkipping additional scoring functions" << std::endl;
+			std::cout << "- NONE -" << std::endl;
 		}
-	}else{
-		std::cout << "Could not find library at default path\nSkipping additional scoring functions" << std::endl;
-	}
-	
-
-   
 
 
-	if(interactive_mode){
-		printf("start score function analysis\n");
-		int run_id = 0;
-
-		while (true) {
-			std::cout << "\nEnter \n" 
-						<< "\t'a' to run tree analysis\n"
-						<< "\t'b' to run analysis performance benchmark\n"
-						<< "\t'r' to reload the library\n" 
-						<< "\t'p [% threshold]' to prune trees\n" 
-						<< "\t'd' to export as dot\n" 
-						<< "\t'e' for a full export as json\n" 
-						<< "\t'q' to quit\n" 
-						<< ":"<< std::endl;
-			std::string userInput; 
-			std::cin >> userInput;
-			char mode = userInput[0];
-
-			if (mode == 'r') {
-				// Reload the library and get the updated array of functions
-				dlclose(sf_lib.handle);
-				std::string library_path = 
-						"./vp/build/lib/libfunctions.so"; //+ std::to_string(run_id)
-				sf_lib = load_scoring_functions(library_path);
+		//evaluate additional score functions
+		LoadedLibrary sf_lib = load_scoring_functions("./vp/build/lib/libfunctions.so");
+		std::array<ScoreFunction, SF_BATCH_SIZE> score_functions;
+		if(sf_lib.handle){
+			if(sf_lib.functions.size() > 0){//TODO 
 				score_functions = sf_lib.functions;
-				//TODO add checks for library and allow to specify custom path
-				run_id++;
-			} 
-			else if(mode == 'a'){ //run analysis
-				analyze_trees(score_functions, instruction_trees);
-			} 
-			else if(mode == 'b'){ //run analysis benchmark
-				using std::chrono::high_resolution_clock;
-				using std::chrono::duration;
-				using std::chrono::milliseconds;
 
-				auto time_analysis1 = high_resolution_clock::now();
-				for (size_t i = 0; i < 100; i++)
-				{
-					analyze_trees(score_functions, instruction_trees);
+				// Access the score_functions array and call the functions
+				std::cout << "Testing loaded score functions: " << std::endl;
+				for (const auto& func : score_functions) {
+					std::cout << "Test Score: " << func({Opcode::Mapping::ADD, Opcode::Mapping::ADD, 100, 8, 0, 3, 2, 1, 1, 0}) << std::endl;
 				}
-				auto time_analysis2 = high_resolution_clock::now();
-				duration<double, std::milli> ms_double = time_analysis2 - time_analysis1;
 
-				std::cout << "Analysis of 300  SF took " << ms_double.count() << "ms\n" 
-					<< ms_double.count()/300.0 << "ms on average per function" << std::endl;
-			} 
-			else if (mode == 'q') {
-				dlclose(sf_lib.handle);
-				break;
-			} 
-			else if (mode == 'p') {
-				float prune_threshold = PRUNE_THRESHOLD_WEIGHT;
-				if(userInput.length() > 1){
-					try {
-						prune_threshold = std::stof(userInput.substr(1))/100.0;
-						std::cout << "Start pruning trees with threshold " << prune_threshold << std::endl;
-					} catch (const std::invalid_argument& e) {
-						std::cout << "No valid threshold specified. Set to default (" << PRUNE_THRESHOLD_WEIGHT << ")" << std::endl;
-					}
-				}
-				for (auto &&tree : instruction_trees)
-				{
-					printf("\tPruning with absolute threshold: %f\n", tree.weight * prune_threshold);
-					tree.prune_tree(tree.weight * prune_threshold, 0);	
-				}
-			} 
-			else if (mode == 'd') {
-				printf("exporting trees to dot\n");
-				std::streambuf *cout_save = std::cout.rdbuf();
-				output_dot(cout_save);
+				// {
+				//     [](ScoreParams p) -> float {
+				// 		float score = ((p.length * p.weight) * p.score_multiplier 
+				// 			+ p.weight * p.score_bonus); //length * minimum_weight;
+				// 		return score;
+				// 	},
+				//     [](ScoreParams p) -> float {
+				// 		float score = ((p.length * p.weight) * p.score_multiplier 
+				// 			+ p.weight * p.score_bonus) / (1 + p.dep_score); 
+				// 		return score;
+				// 	},
+				//     [](ScoreParams p) -> float {
+				// 		float score = ((p.length * p.weight) * p.score_multiplier 
+				// 			+ p.weight * p.score_bonus) * (p.num_children + 1);
+				// 		return score;
+				// 	}
+				// };
+			}else{
+				std::cout << "Error loading scoring functions from library\nSkipping additional scoring functions" << std::endl;
 			}
-			else if (mode == 'e') {
-				printf("exporting trees to json\n");
-				std::streambuf *cout_save = std::cout.rdbuf();
-				output_full(cout_save);
-			} 
-			else {
-				std::cout << "Invalid input." << std::endl;
+		}else{
+			std::cout << "Could not find library at default path\nSkipping additional scoring functions" << std::endl;
+		}
+		
+
+	
+
+
+		if(interactive_mode){
+			printf("start score function analysis\n");
+			int run_id = 0;
+
+			while (true) {
+				std::cout << "\nEnter \n" 
+							<< "\t'a' to run tree analysis\n"
+							<< "\t'b' to run analysis performance benchmark\n"
+							<< "\t'r' to reload the library\n" 
+							<< "\t'p [% threshold]' to prune trees\n" 
+							<< "\t'd' to export as dot\n" 
+							<< "\t'e' for a full export as json\n" 
+							<< "\t'q' to quit\n" 
+							<< ":"<< std::endl;
+				std::string userInput; 
+				std::cin >> userInput;
+				char mode = userInput[0];
+
+				if (mode == 'r') {
+					// Reload the library and get the updated array of functions
+					dlclose(sf_lib.handle);
+					std::string library_path = 
+							"./vp/build/lib/libfunctions.so"; //+ std::to_string(run_id)
+					sf_lib = load_scoring_functions(library_path);
+					score_functions = sf_lib.functions;
+					//TODO add checks for library and allow to specify custom path
+					run_id++;
+				} 
+				else if(mode == 'a'){ //run analysis
+					analyze_trees(score_functions, instruction_trees);
+				} 
+				else if(mode == 'b'){ //run analysis benchmark
+					using std::chrono::high_resolution_clock;
+					using std::chrono::duration;
+					using std::chrono::milliseconds;
+
+					auto time_analysis1 = high_resolution_clock::now();
+					for (size_t i = 0; i < 100; i++)
+					{
+						analyze_trees(score_functions, instruction_trees);
+					}
+					auto time_analysis2 = high_resolution_clock::now();
+					duration<double, std::milli> ms_double = time_analysis2 - time_analysis1;
+
+					std::cout << "Analysis of 300  SF took " << ms_double.count() << "ms\n" 
+						<< ms_double.count()/300.0 << "ms on average per function" << std::endl;
+				} 
+				else if (mode == 'q') {
+					dlclose(sf_lib.handle);
+					break;
+				} 
+				else if (mode == 'p') {
+					float prune_threshold = PRUNE_THRESHOLD_WEIGHT;
+					if(userInput.length() > 1){
+						try {
+							prune_threshold = std::stof(userInput.substr(1))/100.0;
+							std::cout << "Start pruning trees with threshold " << prune_threshold << std::endl;
+						} catch (const std::invalid_argument& e) {
+							std::cout << "No valid threshold specified. Set to default (" << PRUNE_THRESHOLD_WEIGHT << ")" << std::endl;
+						}
+					}
+					for (auto &&tree : instruction_trees)
+					{
+						printf("\tPruning with absolute threshold: %f\n", tree.weight * prune_threshold);
+						tree.prune_tree(tree.weight * prune_threshold, 0);	
+					}
+				} 
+				else if (mode == 'd') {
+					printf("exporting trees to dot\n");
+					std::streambuf *cout_save = std::cout.rdbuf();
+					output_dot(cout_save);
+				}
+				else if (mode == 'e') {
+					printf("exporting trees to json\n");
+					std::streambuf *cout_save = std::cout.rdbuf();
+					output_full(cout_save);
+				} 
+				else {
+					std::cout << "Invalid input." << std::endl;
+				}
 			}
 		}
+		
+		//close library
+		if(sf_lib.handle){
+			dlclose(sf_lib.handle);
+		}
 	}
-	
-	//close library
-	if(sf_lib.handle){
-		dlclose(sf_lib.handle);
-	}
-
 	std::cout << "total instructions: " << csrs.instret.reg << "(" << total_num_instr << ")" << " [" << total_percent*100 << "]" << std::endl;
 	std::cout << "total cycles: " << _compute_and_get_current_cycles() << std::endl;
 
-	std::cout << "Best sequence: " << Opcode::mappingStr[discovered_sequences.back().opcodes[0]] 
-	<< "\nLength: " << discovered_sequences.back().length 
-	<< "\nWeight: " << discovered_sequences.back().minimum_weight
-	<< "\nTotal/\%: " << csrs.instret.reg << "K[" << total_percent*100 << "]"
-	<< "\nNP: " << discovered_sequences.back().get_normalized_score() << std::endl;
+	if(discovered_sequences.empty()){
+		std::cout << "Best sequence: " << "NONE (the whole program fits into one sequence)" 
+		<< "\nLength: " << csrs.instret.reg 
+		<< "\nWeight: " << 1 
+		<< "\n%:      [" << total_percent*100 << "]"
+		<< "\nTotal:  " << csrs.instret.reg
+		<< "\nNP:     1.0" << std::endl;
+	}else{
+		std::cout << "Best sequence: " << Opcode::mappingStr[discovered_sequences.back().opcodes[0]] 
+		<< "\nLength: " << discovered_sequences.back().length 
+		<< "\nWeight: " << discovered_sequences.back().minimum_weight
+		<< "\n%:      [" << total_percent*100 << "]"
+		<< "\nTotal:  " << csrs.instret.reg
+		<< "\nNP:     " << discovered_sequences.back().get_normalized_score() << std::endl;
+	}
 	// std::cout << "$ " << Opcode::mappingStr[discovered_sequences.back().opcodes[0]] 
 	// << " & " << discovered_sequences.back().length 
 	// << " & " << discovered_sequences.back().minimum_weight
