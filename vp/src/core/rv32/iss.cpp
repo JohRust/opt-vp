@@ -13,7 +13,6 @@
 #include <cstdlib>
 
 #include <chrono>
-//#include "fpga.h"
 
 using namespace rv32;
 
@@ -156,8 +155,7 @@ void ISS::exec_step() {
 		pc += 4;
 	}
 
-	if(record_traces){
-		uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
+	uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
 
 //Instead of updateing the entry at the start of the loop with data from the last iteration
 //move this part to the end as memory accesses have to be calculated first
@@ -198,31 +196,30 @@ void ISS::exec_step() {
 // 	//update index
 // 	ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
 
-		//insert into tree of oldest instruction, which will be overwritten in the next step
-		Opcode::Mapping oldest_op = last_executed_steps[ring_buffer_index].last_executed_instruction;
-		if(oldest_op){//ring buffer is still being filled if this is false
-			//check if a tree for this op already exists
-			InstructionNodeR* found_tree = NULL;
-			for (InstructionNodeR& root : instruction_trees){
-				
-				if(root.instruction == oldest_op){
-					found_tree = &root;
-					break;
-				}
+	//insert into tree of oldest instruction, which will be overwritten in the next step
+	Opcode::Mapping oldest_op = last_executed_steps[ring_buffer_index].last_executed_instruction;
+	if(oldest_op){//ring buffer is still being filled if this is false
+		//check if a tree for this op already exists
+		InstructionNodeR* found_tree = NULL;
+		for (InstructionNodeR& root : instruction_trees){
+			
+			if(root.instruction == oldest_op){
+				found_tree = &root;
+				break;
 			}
-			if(found_tree!=NULL){
-				//printf("-> %d\n",found_tree->instruction);
-			}else{
-				//printf("first occurance of op %d. Adding to list\n", oldest_op);
-				instruction_trees.emplace_back(oldest_op, 0);
-				found_tree = &instruction_trees.back();
-			}
-			//printf("found tree found or created for op %d", found_tree->instruction);
-
-			//insert ringbuffer - this opcode into tree
-			found_tree->insert_rb(last_executed_steps, 
-								ring_buffer_index);
 		}
+		if(found_tree!=NULL){
+			//printf("-> %d\n",found_tree->instruction);
+		}else{
+			//printf("first occurance of op %d. Adding to list\n", oldest_op);
+			instruction_trees.emplace_back(oldest_op, 0);
+			found_tree = &instruction_trees.back();
+		}
+		//printf("found tree found or created for op %d", found_tree->instruction);
+
+		//insert ringbuffer - this opcode into tree
+		found_tree->insert_rb(last_executed_steps, 
+							ring_buffer_index);
 	}
 
 	if (trace) {
@@ -259,12 +256,6 @@ void ISS::exec_step() {
 		//printf("OP: %s\n", Opcode::mappingStr[op]);
 
 	switch (op) {
-
-		// custom instruction
-		//case Opcode::BCOEFF:
-		//	regs[instr.rd()] = binomialCoeff(regs[instr.rs1()],  regs[instr.rs2()]);
-		//	break;
-
 		case Opcode::UNDEF:
 			if (trace)
 				std::cout << "[ISS] WARNING: unknown instruction '" << std::to_string(instr.data()) << "' at address '"
