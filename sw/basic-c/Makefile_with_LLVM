@@ -1,10 +1,13 @@
-LD       = riscv32-unknown-elf-clang++
 OBJECTS  = main.o sum.o bootstrap.o
-CXXFLAGS = -march=rv32imaf -mabi=ilp32f
+
+CFLAGS   = -march=rv32gc -mabi=ilp32d -g
+CXXFLAGS = -march=rv32gc -mabi=ilp32d -g
+
+override CC = $(RISCV_PREFIX)clang
+override CXX = $(RISCV_PREFIX)clang++
+override LD = $(RISCV_PREFIX)clang++
 
 include ../Makefile.common
-override CXX = $(RISCV_PREFIX)clang++
-override CXXFLAGS = -march=rv32imaf -mabi=ilp32f -g
-override CFLAGS =
+
 override LDFLAGS = -static -nostartfiles
 override LD = $(CXX)
