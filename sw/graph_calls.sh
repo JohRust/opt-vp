@@ -12,7 +12,7 @@ $LLVM/clang++ -march=rv32gc -mabi=ilp32d  -S -emit-llvm main.cpp -o graphs/main.
 
 
 #create callgraph of main.ll and make a svg out of it
-$LLVM/opt -passes=dot-callgraph -o graphs/callgraph.dot graphs/main.ll
+$LLVM/opt -passes=dot-callgraph -o /dev/null graphs/main.ll
 dot -Tsvg graphs/main.ll.callgraph.dot -o graphs/main.ll.callgraph.svg
 rm graphs/main.ll.callgraph.dot
 
