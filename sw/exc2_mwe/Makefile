@@ -1,0 +1,51 @@
+OBJECTS  = main.o bootstrap.o irq.o
+CFLAGS   = -march=rv32gc -mabi=ilp32d  -g
+CXXFLAGS = -march=rv32gc -mabi=ilp32d  -g
+LDFLAGS  = -nostartfiles -Wl,--no-relax -static
+
+########################################################################
+RISCV_PREFIX ?= riscv32-unknown-elf-
+
+override CC = $(RISCV_PREFIX)clang
+override CXX = $(RISCV_PREFIX)clang++
+override LD = $(RISCV_PREFIX)clang++
+
+ASFLAGS ?= $(CFLAGS)
+SIM_TARGET ?= sim-default
+
+#CFLAGS += -misa-spec=2.2
+#CXXFLAGS += -misa-spec=2.2
+
+VP ?= riscv-vp
+VP_FLAGS ?= --intercept-syscalls --error-on-zero-traphandler=true
+
+EXECUTABLE ?= main
+OBJECTS ?= main.o
+
+$(EXECUTABLE): $(OBJECTS)
+	$(LD) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+%.o: %.S
+	$(CC) $(CPPFLAGS) $(ASFLAGS) -c $< -o $@
+%.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+%.o: %.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+sim: $(SIM_TARGET)
+sim-default: $(EXECUTABLE)
+	$(VP) $(VP_FLAGS) $<
+
+dump-elf: $(EXECUTABLE)
+	$(RISCV_PREFIX)readelf -a main
+
+dump-code: $(EXECUTABLE)
+	$(RISCV_PREFIX)objdump -D main
+
+clean:
+	rm -f $(OBJECTS) $(EXECUTABLE) $(CLEAN_EXTRA)
+
+.PHONY: sim sim-default dump-elf dump-code clean
+.DEFAULT_GOAL := $(EXECUTABLE)
+
+########################################################################
