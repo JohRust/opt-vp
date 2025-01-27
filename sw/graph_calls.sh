@@ -1,3 +1,6 @@
+# Create graphs folder
+mkdir graphs -p
+
 # create IR file. --march and --mabi do not affect the IR, but will be written as target to some meta data at the end of the file..
 $LLVM/clang++ -march=rv32gc -mabi=ilp32d  -S -emit-llvm main.cpp -o graphs/main.ll
 
@@ -20,9 +23,9 @@ rm graphs/main.ll.callgraph.dot
 cd graphs
 mkdir cfg
 cd cfg
-$LLVM/opt -passes=dot-cfg -o ../cfg.dot ../main.ll
+$LLVM/opt -passes=dot-cfg ../main.ll
 dot -Tsvg .main.dot -o main_cfg.svg
-
+cd ..
 
 # Options for llc
 #-view-dag-combine1-dags displays the DAG after being built, before the first optimization pass.
@@ -35,3 +38,4 @@ cd graphs
 mkdir combine1
 cd combine1
 $LLVM/llc -view-isel-dags -fast-isel=false ../main.ll
+cd ../..
