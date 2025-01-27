@@ -76,8 +76,9 @@ STORE	x31, 30 * REGBYTES(sp)
 // load interrupt/trap reason and call external C function to handle it
 csrr    t2, mcause
 srli    t3, t2, 31
-bnez    t3, handle_irq
+bnez    t3, handle_irq  // If MSB is 1, it's an interrupt
 
+// Handle exceptions
 li      t0, SYSCALL_ADDR
 csrr    t1, mhartid
 csrr    a7, mcause

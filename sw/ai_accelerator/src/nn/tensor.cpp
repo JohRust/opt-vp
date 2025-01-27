@@ -69,7 +69,7 @@ Tensor<T> Tensor<T>::normal(std::vector<int> shape, T mean, T std) {
     }
     std::vector<T> data(n_data);
     for (int i = 0; i < n_data; i++) {
-        data[i] = dist(gen);
+        data[i] = dist(gen); //Creates issue here
     }
     return Tensor<T>(data, shape);
 }
