@@ -1,6 +1,6 @@
-extern "C" {
-	#include "irq.h"
-}
+//extern "C" {
+//	#include "irq.h"
+//}
 #include <stdexcept>
 
 // We need to tell the C++ runtime that we don't have dynamic shared objects, we load at runtime.
