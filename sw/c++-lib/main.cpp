@@ -2,6 +2,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <random>
 
 struct A {
 	int a;
@@ -28,6 +29,13 @@ int main() {
 	float af = 1.0;
 	float bf = 2.0;
 	float cf = af * bf;
+
+	/*
+	//create random generator
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::normal_distribution<float> dis(0, 1);
+	std::cout << dis(gen) << std::endl; */
 
 	std::cout << "Hello World\n";
 	B x(5, 2);

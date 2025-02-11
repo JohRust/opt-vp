@@ -1,12 +1,11 @@
 LD       = riscv32-unknown-elf-clang++
 OBJECTS  = main.o
-CXXFLAGS = -march=rv32gc -mabi=ilp32d
 
 RISCV_PREFIX ?= riscv32-unknown-elf-
 
 include ../Makefile.common
 override CXX = $(RISCV_PREFIX)clang++
-override CXXFLAGS = -march=rv32gc -mabi=ilp32d -g
-override CFLAGS =
-override LDFLAGS = -static
+override CXXFLAGS = -march=rv32gc -mabi=ilp32d -g -fprofile-instr-generate
+override CFLAGS =   -march=rv32gc -mabi=ilp32d -g -fprofile-instr-generate
+override LDFLAGS =  -fprofile-instr-generate
 override LD = $(CXX)
