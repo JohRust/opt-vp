@@ -1260,8 +1260,8 @@ void ISS::exec_step() {
 
 		// Custom codes for ECXL+ project
 		case Opcode::DUMMY_R_1: {
-			printf("DUMMY_R_1 was used\n");
-			regs[instr.rd()] = -1;
+			// printf("DUMMY_R_1 was used\n");
+			regs[RD] = ((regs[RS1] << 2)-16) + regs[RS2];
 		} break;
 		case Opcode::DUMMY_R_2: {
 			printf("DUMMY_R_2 was used\n");
