@@ -1,0 +1,13 @@
+OBJECTS  = sum.o
+CFLAGS   = -march=rv32i -mabi=ilp32
+LDFLAGS  = -nostartfiles -Wl,--no-relax
+VP_FLAGS = --error-on-zero-traphandler=true
+
+RISCV_PREFIX ?= riscv32-unknown-elf-
+
+include ../Makefile.common
+override CFLAGS = -march=rv32i -mabi=ilp32
+override CXXFLAGS = -march=rv32i -mabi=ilp32
+override CXX = $(RISCV_PREFIX)clang++
+override CC = $(RISCV_PREFIX)clang
+override LD = $(CXX)
