@@ -785,6 +785,17 @@ Opcode::Type Opcode::getType(Opcode::Mapping mapping) {
 		case FNMSUB_D:
 		case FNMADD_D:
 			return Type::R4;
+		//Custom Instructions
+		case DUMMY_R_1:
+		    return Type::R;
+		case DUMMY_R_2:
+		    return Type::R;
+		case DUMMY_R_3:
+		    return Type::R;
+		case DUMMY_R_4:
+			return Type::R;
+		case DUMMY_R_5:
+			return Type::R;
 
 		default:
 			return Type::UNKNOWN;
@@ -1913,6 +1924,21 @@ Opcode::Mapping Instruction::decode_normal(Architecture arch) {
 					MATCH_AND_RETURN_INSTR(FNMADD_S);
 				case F2_FNMADD_D:
 					MATCH_AND_RETURN_INSTR(FNMADD_D);
+			}
+			break;
+
+		case OP_CUST1:
+			switch (instr.funct3()) {
+				case F3_DUMMY_R_1:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_1)
+				case F3_DUMMY_R_2:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_2)
+				case F3_DUMMY_R_3:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_3)
+				case F3_DUMMY_R_4:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_4)
+				case F3_DUMMY_R_5:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_5)
 			}
 			break;
 	}

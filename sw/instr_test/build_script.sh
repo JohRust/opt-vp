@@ -1,4 +1,4 @@
-LLVM=~/Dokumente/ECXL/git/compilers/builds/riscv32-unknown-elf-gcc-rv32gc-ilp32d/bin
+LLVM=~/Dokumente/DFKI/ECXL/git/compiler/builds/riscv32-unknown-elf-rv32gc-ilp32d-multilib/bin
 
 $LLVM/clang -S -emit-llvm main.c -o main.ll
 $LLVM/clang -S -emit-llvm main.c -o main.ll
