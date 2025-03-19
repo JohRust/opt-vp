@@ -2,8 +2,8 @@ OBJECTS  = main.o bootstrap.o
 
 include ../Makefile.common
 
-CFLAGS   = -march=rv32i -mabi=ilp32
-CXXFLAGS = -march=rv32i -mabi=ilp32
+CFLAGS   = -march=rv32i -mabi=ilp32 -g
+CXXFLAGS = -march=rv32i -mabi=ilp32 -g
 RISCV_PREFIX ?= riscv32-unknown-elf-
 
 override CC = $(RISCV_PREFIX)clang
