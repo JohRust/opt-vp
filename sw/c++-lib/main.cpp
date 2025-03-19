@@ -30,12 +30,13 @@ int main() {
 	float bf = 2.0;
 	float cf = af * bf;
 
-	/*
+
 	//create random generator
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::normal_distribution<float> dis(0, 1);
-	std::cout << dis(gen) << std::endl; */
+	float rand_num = dis(gen);
+	std::cout << rand_num << std::endl;
 
 	std::cout << "Hello World\n";
 	B x(5, 2);
