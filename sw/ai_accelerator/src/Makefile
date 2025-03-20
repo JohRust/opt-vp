@@ -2,8 +2,11 @@ OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
 # All object files in nn directory
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
-CFLAGS   = -march=rv32gc -mabi=ilp32d -fno-exceptions -g
-CXXFLAGS = -march=rv32gc -mabi=ilp32d -fno-exceptions -g
+#TARGET_ARCH = rv32imac
+#TARGET_ABI  = ilp32
+
+CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) -O0
+CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) -O0
 LDFLAGS  = -nostartfiles -Wl,--no-relax -static
 
 ########################################################################

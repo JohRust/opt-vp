@@ -1,0 +1,25 @@
+-O3:
+rv32imac
+num-instr = 4406648
+rv32ima
+rv32im
+num-instr = 4407699
+rv32i
+num-instr = 6253451
+
+-O1:
+rv32imac
+num-instr = 4619908
+rv32im
+num-instr = 4614195
+rv32i
+num-instr = 6632069
+
+-O0:
+rv32imac
+num-instr = 18861089
+rv32im
+num-instr = 18857334
+rv32i
+num-instr = 20955636
+
