@@ -2,12 +2,15 @@ OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
 # All object files in nn directory
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
-#TARGET_ARCH = rv32imac
-#TARGET_ABI  = ilp32
 
-CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) -O0
-CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) -O0
+TARGET_ARCH = rv32imafd
+TARGET_ABI  = ilp32d
+OPTIMIZATION = -O1
+
+CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION)
+CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION)
 LDFLAGS  = -nostartfiles -Wl,--no-relax -static
+ASFLAGS ?= $(CFLAGS)
 
 ########################################################################
 RISCV_PREFIX ?= riscv32-unknown-elf-
@@ -16,11 +19,7 @@ override CC = $(RISCV_PREFIX)clang
 override CXX = $(RISCV_PREFIX)clang++
 override LD = $(RISCV_PREFIX)clang++
 
-ASFLAGS ?= $(CFLAGS)
 SIM_TARGET ?= sim-default
-
-#CFLAGS += -misa-spec=2.2
-#CXXFLAGS += -misa-spec=2.2
 
 VP ?= riscv-vp
 VP_FLAGS ?= --intercept-syscalls --error-on-zero-traphandler=true
