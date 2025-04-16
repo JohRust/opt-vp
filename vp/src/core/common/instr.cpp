@@ -343,6 +343,18 @@ constexpr uint32_t FCVT_D_LU_ENCODING = 0b11010010001100000000000001010011;
 constexpr uint32_t FMV_D_X_MASK = 0b11111111111100000111000001111111;
 constexpr uint32_t FMV_D_X_ENCODING = 0b11110010000000000000000001010011;
 
+// Custom instructions for ECXL+ project
+constexpr uint32_t DUMMY_R_1_MASK =     0b11111110000000000111000001111111;
+constexpr uint32_t DUMMY_R_1_ENCODING = 0b00000000000000000000000000101011;
+constexpr uint32_t DUMMY_R_2_MASK =     0b11111110000000000111000001111111;
+constexpr uint32_t DUMMY_R_2_ENCODING = 0b00000000000000000001000000101011;
+constexpr uint32_t DUMMY_R_3_MASK =     0b11111110000000000111000001111111;
+constexpr uint32_t DUMMY_R_3_ENCODING = 0b00000000000000000010000000101011;
+constexpr uint32_t DUMMY_R_4_MASK =     0b11111110000000000111000001111111;
+constexpr uint32_t DUMMY_R_4_ENCODING = 0b00000000000000000011000000101011;
+constexpr uint32_t DUMMY_R_5_MASK =     0b11111110000000000111000001111111;
+constexpr uint32_t DUMMY_R_5_ENCODING = 0b00000000000000000100000000101011;
+
 #define MATCH_AND_RETURN_INSTR2(instr, result)                     \
 	if (unlikely((data() & (instr##_MASK)) != (instr##_ENCODING))) \
 		return UNDEF;                                              \
@@ -773,6 +785,17 @@ Opcode::Type Opcode::getType(Opcode::Mapping mapping) {
 		case FNMSUB_D:
 		case FNMADD_D:
 			return Type::R4;
+		//Custom Instructions
+		case DUMMY_R_1:
+		    return Type::R;
+		case DUMMY_R_2:
+		    return Type::R;
+		case DUMMY_R_3:
+		    return Type::R;
+		case DUMMY_R_4:
+			return Type::R;
+		case DUMMY_R_5:
+			return Type::R;
 
 		default:
 			return Type::UNKNOWN;
@@ -1901,6 +1924,21 @@ Opcode::Mapping Instruction::decode_normal(Architecture arch) {
 					MATCH_AND_RETURN_INSTR(FNMADD_S);
 				case F2_FNMADD_D:
 					MATCH_AND_RETURN_INSTR(FNMADD_D);
+			}
+			break;
+
+		case OP_CUST1:
+			switch (instr.funct3()) {
+				case F3_DUMMY_R_1:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_1)
+				case F3_DUMMY_R_2:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_2)
+				case F3_DUMMY_R_3:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_3)
+				case F3_DUMMY_R_4:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_4)
+				case F3_DUMMY_R_5:
+					MATCH_AND_RETURN_INSTR(DUMMY_R_5)
 			}
 			break;
 	}

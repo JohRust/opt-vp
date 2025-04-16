@@ -20,3 +20,6 @@ nbproject/
 sw/basic-gcov/main.*
 sw/**/*.o
 out/
+sw/*/traces
+sw/*/graphs
+sw/*/*.gcno

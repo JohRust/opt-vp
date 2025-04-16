@@ -10,6 +10,9 @@
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
+#include <optimizations.h>
+
+#include "trace.h"
 
 using namespace rv32;
 
@@ -257,6 +260,26 @@ int SyscallHandler::execute_syscall(uint64_t n, uint64_t _a0, uint64_t _a1, uint
 			return 0;
 		case SYS_zero:
 			std::cout << "ZERO syscall" << std::endl;
+			return 0;
+
+		case SYS_traces:
+			if (_a0 == 0) {
+				record_traces = false;
+			} else {
+				record_traces = true;
+			}
+			return 0;
+
+		case SYS_custom1:
+			//std::cout << "custom syscall 1 with a0=" << _a0 << " and a1=" << _a1 << std::endl;
+			return binomialCoeff(_a0, _a1);
+
+		case SYS_custom2:
+			std::cout << "custom syscall 2" << std::endl;
+			return 0;
+
+		case SYS_custom3:
+			std::cout << "custom syscall 3" << std::endl;
 			return 0;
 	}
 

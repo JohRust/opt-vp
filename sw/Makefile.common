@@ -28,11 +28,11 @@ $(EXECUTABLE): $(OBJECTS)
 	$(LD) $(CXXFLAGS) $(CFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 %.o: %.S
-	$(CC) $(CPPFLAGS) $(ASFLAGS) -c $<
+	$(CC) $(CPPFLAGS) $(ASFLAGS) -c $< -o $@
 %.o: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 %.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 ########################################################################
 

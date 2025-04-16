@@ -1272,6 +1272,28 @@ void ISS::exec_step() {
             RAISE_ILLEGAL_INSTRUCTION();
             break;
 
+		// Custom codes for ECXL+ project
+		case Opcode::DUMMY_R_1: {
+			// printf("DUMMY_R_1 was used\n");
+			regs[RD] = ((regs[RS1] << 2)-16) + regs[RS2];
+		} break;
+		case Opcode::DUMMY_R_2: {
+			printf("DUMMY_R_2 was used\n");
+			regs[instr.rd()] = -1;
+		} break;
+		case Opcode::DUMMY_R_3: {
+			printf("DUMMY_R_3 was used\n");
+			regs[instr.rd()] = -1;
+		} break;
+		case Opcode::DUMMY_R_4: {
+			printf("DUMMY_R_4 was used\n");
+			regs[instr.rd()] = -1;
+		} break;
+		case Opcode::DUMMY_R_5: {
+			printf("DUMMY_R_5 was used\n");
+			regs[instr.rd()] = -1;
+		} break;
+
         default:
 			printf("ERROR: unsupported instruction[" BYTE_TO_BINARY_PATTERN "] at address %x", 
               BYTE_TO_BINARY(instr.opcode()),last_pc);

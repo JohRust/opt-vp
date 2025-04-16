@@ -34,6 +34,8 @@
 
 // Opcode::Type getType(Opcode::Mapping mapping);
 
+inline bool record_traces = false; // Only collect traces if this variable is switched on
+
 enum class InstructionType {
 	UNKNOWN = 0,
 	Arithmetic,
@@ -151,7 +153,7 @@ struct Path
 	float score_bonus = 0;
 	float score_multiplier = 1.0;
 
-	double inverse_dependency_score = 0.0;
+	float inverse_dependency_score = 0.0;
 	std::vector<uint64_t> path_hashes;
 	std::vector<Opcode::Mapping> opcodes;
 	InstructionNode* end_of_sequence;
@@ -457,9 +459,9 @@ class InstructionNode{
 			uint32_t result = 0;
 			for (size_t i = 0; i < INSTRUCTION_TREE_DEPTH; i++)
 			{
-			if(dependencies_true_[i]){
-				result++;
-			}
+				if(dependencies_true_[i]){
+					result++;
+				}
 			}
 			return result;
 		}

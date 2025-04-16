@@ -232,6 +232,11 @@ enum Parts {
 
 	// reserved opcodes for custom instructions
 	OP_CUST1 = 0b0101011,
+	F3_DUMMY_R_1 = 0b000,
+	F3_DUMMY_R_2 = 0b001,
+	F3_DUMMY_R_3 = 0b010,
+	F3_DUMMY_R_4 = 0b011,
+	F3_DUMMY_R_5 = 0b100,
 	OP_CUST0 = 0b0001011,
 };
 
@@ -425,6 +430,13 @@ enum Mapping {
 	MRET,
 	WFI,
 	SFENCE_VMA,
+
+	//Custom Instructions for ECXL+
+	DUMMY_R_1,
+	DUMMY_R_2,
+	DUMMY_R_3,
+	DUMMY_R_4,
+	DUMMY_R_5,
 
 	NUMBER_OF_INSTRUCTIONS
 };
