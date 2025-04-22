@@ -2390,7 +2390,7 @@ void ISS::output_json(std::streambuf *cout_save,
 		//save or print json
 		if(!output_filename || !output_filename[0]){
 			
-			std::cout << top_level_json.dump(4) << std::endl;
+			std::cout << top_level_json.dump(JSON_INDENT) << std::endl;
 
 		}else{
 			std::string single_output_filename = "";
@@ -2407,7 +2407,7 @@ void ISS::output_json(std::streambuf *cout_save,
 			output = std::ofstream(single_output_filename);
 			std::cout.rdbuf(output.rdbuf());
 
-			std::cout << top_level_json.dump(4) << std::endl;
+			std::cout << top_level_json.dump(JSON_INDENT) << std::endl;
 
 
 
@@ -2436,7 +2436,7 @@ void ISS::output_full(std::streambuf *cout_save){
 		output = std::ofstream(single_output_filename);
 		std::cout.rdbuf(output.rdbuf());
 		tree_json_array = tree.to_json();
-		std::string json_string = tree_json_array.dump(4);
+		std::string json_string = tree_json_array.dump(JSON_INDENT);
 		std::cout << json_string << std::endl;
 		index++;
 
