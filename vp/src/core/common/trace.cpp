@@ -1,5 +1,5 @@
 #include "trace.h"
-
+#include <stack>
 #include <bitset>
 #include "lib/json/single_include/nlohmann/json.hpp"
 
@@ -863,18 +863,51 @@ void InstructionNodeR::to_csv(const CsvParams& p) {
 }
 
 nlohmann::ordered_json InstructionNodeR::to_json(){
-	nlohmann::ordered_json additional_fields;
-
-	nlohmann::ordered_json jsonChildren = nlohmann::ordered_json::array(); 
-	for (auto &&child : children)
-	{
-		jsonChildren.push_back(child->to_json());
+	nlohmann::ordered_json result = InstructionNode::to_json();
+	result["children"] = nlohmann::ordered_json::array();
+	
+	// Use a stack to track nodes to process
+	std::stack<std::pair<InstructionNode*, nlohmann::ordered_json*>> nodes_stack;
+	nodes_stack.push({this, &result});
+	
+	int prog_counter = 0;
+	while (!nodes_stack.empty()) {
+		printf("\rProcessing node %d", prog_counter++);
+		auto [current_node, parent_json] = nodes_stack.top();
+		nodes_stack.pop();
+		
+		// Process the current node's children
+		InstructionNodeR* r_node = dynamic_cast<InstructionNodeR*>(current_node);
+		if (r_node) {
+			for (auto child : r_node->children) {
+				// Create JSON for this child
+				nlohmann::ordered_json child_json = child->InstructionNode::to_json();
+				
+				// Add children array if this is a node that can have children
+				bool has_children = dynamic_cast<InstructionNodeR*>(child) || 
+								   dynamic_cast<InstructionNodeMemory*>(child) || 
+								   dynamic_cast<InstructionNodeBranch*>(child);
+				
+				if (has_children) {
+					child_json["children"] = nlohmann::ordered_json::array();
+					// Add child to parent's children array first
+					parent_json->at("children").push_back(child_json);
+					
+					// Get reference to the added child in the parent's array
+					nlohmann::ordered_json* child_json_ref = &(parent_json->at("children").back());
+					
+					// Push to stack with reference to the actual JSON object in the tree
+					nodes_stack.push({child, child_json_ref});
+				} else {
+					// Leaf node - just add to parent
+					parent_json->at("children").push_back(child_json);
+				}
+			}
+		}
 	}
-	additional_fields["children"] = jsonChildren;
-
-	nlohmann::ordered_json base_class_json = InstructionNode::to_json();
-	base_class_json.update(additional_fields);
-	return base_class_json;
+	
+	printf("\n"); // Add newline after progress counter
+	return result;
 }
 
 //called recursively for children
