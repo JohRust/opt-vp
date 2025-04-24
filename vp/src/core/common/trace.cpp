@@ -872,7 +872,10 @@ nlohmann::ordered_json InstructionNodeR::to_json(){
 	
 	int prog_counter = 0;
 	while (!nodes_stack.empty()) {
-		printf("\rProcessing node %d", prog_counter++);
+		if (prog_counter % 100 == 0) {
+			printf("\rProcessing node %d");
+		}
+		prog_counter++;
 		auto [current_node, parent_json] = nodes_stack.top();
 		nodes_stack.pop();
 		
