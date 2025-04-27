@@ -870,11 +870,9 @@ nlohmann::ordered_json InstructionNodeR::to_json(){
 	std::stack<std::pair<InstructionNode*, nlohmann::ordered_json*>> nodes_stack;
 	nodes_stack.push({this, &result});
 	
-	int prog_counter = 0;
+	unsigned int prog_counter = 0;
 	while (!nodes_stack.empty()) {
-		if (prog_counter % 100 == 0) {
-			printf("\rProcessing node %d");
-		}
+		printf("\rProcessing node %d", prog_counter);
 		prog_counter++;
 		auto [current_node, parent_json] = nodes_stack.top();
 		nodes_stack.pop();

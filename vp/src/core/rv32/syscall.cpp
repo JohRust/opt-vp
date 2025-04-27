@@ -268,6 +268,7 @@ int SyscallHandler::execute_syscall(uint64_t n, uint64_t _a0, uint64_t _a1, uint
 			} else {
 				record_traces = true;
 			}
+			std::cout << "traces syscall set to " << record_traces << " / " << _a0 << std::endl;
 			return 0;
 
 		case SYS_custom1:

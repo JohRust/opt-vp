@@ -157,6 +157,7 @@ void ISS::exec_step() {
 
 	uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
 
+	if (record_traces) {
 //Instead of updateing the entry at the start of the loop with data from the last iteration
 //move this part to the end as memory accesses have to be calculated first
 //otherwise memory accesses are off by 1
@@ -263,6 +264,7 @@ void ISS::exec_step() {
 			default:;
 		}
 		puts("");
+	}
 	}
 
 		//printf("[%x] OP: %s\n", last_pc, Opcode::mappingStr[op]);
@@ -1303,6 +1305,9 @@ void ISS::exec_step() {
 //---------------------------------------------------------------------------------
 //                             save instruction info of last execution
 //---------------------------------------------------------------------------------
+	
+	//std::cout << "recording instruction " << record_traces << std::endl;
+	if (record_traces) {
 		last_executed_steps[ring_buffer_index].last_executed_instruction = op;
 		last_executed_steps[ring_buffer_index].last_cycles = cycles_diff;
 		last_executed_steps[ring_buffer_index].last_registers = {RS1,RS2,RD};
@@ -1342,7 +1347,7 @@ void ISS::exec_step() {
 	//updating ringbuffer done
 	//update index
 	ring_buffer_index = (ring_buffer_index+1)%INSTRUCTION_TREE_DEPTH;
-
+	}
 }
 
 uint64_t ISS::_compute_and_get_current_cycles() {

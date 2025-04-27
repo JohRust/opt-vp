@@ -6,7 +6,7 @@
 
 #include "lib/json/single_include/nlohmann/json.hpp"
 
-#define INSTRUCTION_TREE_DEPTH 10
+#define INSTRUCTION_TREE_DEPTH 50
 #define JSON_INDENT -1
 #define MAX_VARIANTS 3
 #define SF_BATCH_SIZE 3

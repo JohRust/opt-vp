@@ -31,15 +31,17 @@ int main(int argc, char **argv) {
 	linear2->setBiases(Tensor<float>({0.0}, {1}));
 	model.addLayer(linear2);
 
+	START_TRACE;
 	Tensor<float> input_data({1.0, 2.0, 3.0, 4.0}, {1, 4});
 	Tensor<float> background_data({0.0,0.0,0.0,0.0}, {1, 4});
-	Tensor<float> shapley_values = expected_gradients<float>(model, input_data, background_data, 50);
+	//Tensor<float> shapley_values = expected_gradients<float>(model, input_data, background_data, 50);
 	Tensor<float> shapley_values_exact = exact_shap<float>(model, input_data, background_data);
-	printf("Shapley values:\n");
-	printf("%s\n", shapley_values.toString().c_str());
+	STOP_TRACE;
+	
+	//printf("Shapley values:\n");
+	//printf("%s\n", shapley_values.toString().c_str());
 	printf("Exact Shapley values:\n");
 	printf("%s\n", shapley_values_exact.toString().c_str());
-
 	Tensor<float> preds = model.forward(input_data);
 	printf("Predictions: %s\n", preds.toString().c_str());
 	float expected_value = model.forward(background_data).mean();
