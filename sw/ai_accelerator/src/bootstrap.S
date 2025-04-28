@@ -16,10 +16,8 @@ sw   a6, 0(t0)
 
 #Make syscall with two parameters
 make_syscall:
-    mv a7, a2
-    li t0, SYSCALL_ADDR
-    csrr a6, mhartid
-    sw a6, 0(t0)
+    mv a7, a2    # Move the syscall number to a7 (standard RISC-V convention)
+    ecall        # Generate environment call trap
     ret
 
 _start:
