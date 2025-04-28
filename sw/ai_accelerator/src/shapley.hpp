@@ -236,7 +236,6 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 
 	// Create a tensor to store the expected gradients
 	Tensor<T> grads = Tensor<T>::zeros(input.getShape());
-	Tensor<T> input_pred = module.forward(input);
 
 	// Use a form of Monte Carlo estimates to calculate the expected gradients
 	// E[f(x)] = 1/N * sum(f(x_i))
