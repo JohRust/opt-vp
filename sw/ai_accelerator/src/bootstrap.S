@@ -93,7 +93,7 @@ beq	t2, t0, handle_syscall
 // is fault
 handle_fault:
 // exit(1) on fault
-SYS_EXIT t2
+SYS_EXIT 42
 j handle_fault
 
 handle_syscall:
