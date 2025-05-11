@@ -21,22 +21,25 @@ make_syscall:
     ret
 
 _start:
+// Set mtvec (direct; level_0_interrupt_handler)
 la t0, level_0_interrupt_handler
 csrw mtvec, t0
+
+/*
+ * enable machine-level interrupts: external (mie.MEIP),
+ * timer (mie.MTIP) and software (mie.MSIP)
+ */
 li t1, 0x888
 csrw mie, t1
+
+// set global (machine) interrupt enable (mstatus.MIE)
 csrsi mstatus, 8
-li t0, PLIC_ENABLED_IRQ_ADDR
-li t1, -1
-sw t1, 0(t0)
-sw t1, 4(t0)
 
-# Enable the FPU by setting the FS (Floating-Point Status) field in mstatus
-#csrr a0, mstatus
-#li a1, 0x00006000  # Set FS field to 11 (Dirty)
-#or a0, a0, a1
-#csrw mstatus, a0
+// Enable FPU
+li t1, 0x6000
+csrs mstatus, t1
 
+// jump to main
 jal main
 
 # call exit (SYS_EXIT=93) with exit code 0 (argument in a0)
@@ -44,7 +47,8 @@ SYS_EXIT 0
 
 
 /*
- * Interrupt handler for non-nested interrupts. Only selected registers are stored/re-stored, i.e. those not preserved on function calls.
+ * Interrupt handler for non-nested interrupts.
+ * Only selected registers are stored/re-stored, i.e. those not preserved on function calls.
  */
 #define STORE    sw
 #define LOAD     lw
@@ -52,13 +56,13 @@ SYS_EXIT 0
 
 level_0_interrupt_handler:
 // store execution context on the stack (register content)
-addi    sp,  sp, -REGBYTES * 32
-STORE	x1,  0x0(sp)
-STORE	x4,  3  * REGBYTES(sp)
-STORE	x5,  4  * REGBYTES(sp)
-STORE	x6,  5  * REGBYTES(sp)
-STORE	x7,  6  * REGBYTES(sp)
-STORE	x10, 9  * REGBYTES(sp)
+addi    sp, sp, -REGBYTES * 32
+STORE	x1, 0x0(sp)
+STORE	x4, 3 * REGBYTES(sp)
+STORE	x5, 4 * REGBYTES(sp)
+STORE	x6, 5 * REGBYTES(sp)
+STORE	x7, 6 * REGBYTES(sp)
+STORE	x10, 9 * REGBYTES(sp)
 STORE	x11, 10 * REGBYTES(sp)
 STORE	x12, 11 * REGBYTES(sp)
 STORE	x13, 12 * REGBYTES(sp)
@@ -71,24 +75,41 @@ STORE	x29, 28 * REGBYTES(sp)
 STORE	x30, 29 * REGBYTES(sp)
 STORE	x31, 30 * REGBYTES(sp)
 
-// load interrupt/trap reason and call external C function to handle it
+// read mcause
 csrr    t2, mcause
-srli    t3, t2, 31
-bnez    t3, handle_irq  // If MSB is 1, it's an interrupt
 
-// Handle exceptions
+// is interrupt
+srli    t3, t2, 31
+bnez    t3, handle_irq
+
+// is syscall
+li	t0, 11			// ecall machine mode
+beq	t2, t0, handle_syscall
+li	t0, 9			// ecall supervisor mode
+beq	t2, t0, handle_syscall
+li	t0, 8			// ecall user mode
+beq	t2, t0, handle_syscall
+
+// is fault
+handle_fault:
+// exit(1) on fault
+SYS_EXIT t2
+j handle_fault
+
+handle_syscall:
+// route to syscall module
 li      t0, SYSCALL_ADDR
 csrr    t1, mhartid
-csrr    a7, mcause
 sw      t1, 0(t0)
+sw      a0, 9 * REGBYTES(sp)	// save return value
+// skip ecall instruction
 csrr    t0, mepc
 addi    t0, t0, 4
 csrw    mepc, t0
-sw      a0, 9 * REGBYTES(sp)
-
 j       done_trap
 
 handle_irq:
+// load interrupt/trap reason and call external C function to handle it
 mv      a0, t2
 jal     level_1_interrupt_handler
 

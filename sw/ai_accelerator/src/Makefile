@@ -3,7 +3,7 @@ OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
 
-TARGET_ARCH = rv32imac
+TARGET_ARCH = rv32im
 TARGET_ABI  = ilp32
 OPTIMIZATION = -O1 -g
 
