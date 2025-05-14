@@ -52,6 +52,8 @@ dump-code: $(EXECUTABLE)
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(CLEAN_EXTRA)
+	rm -f $(wildcard *cpp.s)
+	rm -f $(wildcard nn/*.cpp.s)
 
 .PHONY: sim sim-default dump-elf dump-code clean
 .DEFAULT_GOAL := $(EXECUTABLE)

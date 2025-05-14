@@ -36,7 +36,7 @@ csrw mie, t1
 csrsi mstatus, 8
 
 // Enable FPU
-li t1, 0x6000
+li t1, 0x6000 // Write decimal 24576 (binary 0110000000000000) to mstatus.fp
 csrs mstatus, t1
 
 // jump to main
