@@ -3,13 +3,13 @@ OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
 
-TARGET_ARCH = rv32gc
-TARGET_ABI  = ilp32d
+TARGET_ARCH = rv32imafc
+TARGET_ABI  = ilp32
 OPTIMIZATION = -O1
 DEBUG_FLAG = -g
 
-CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION) $(DEBUG_FLAG)
-CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION) $(DEBUG_FLAG)
+CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION)
+CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION)
 ASFLAGS ?= -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(DEBUG_FLAG)
 LDFLAGS  = -nostartfiles -Wl,--no-relax -static
 
@@ -34,10 +34,11 @@ $(EXECUTABLE): $(OBJECTS)
 %.o: %.S
 	$(CC) $(ASFLAGS) -c $< -o $@
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -o $<.s -S $<
+	$(CC) $(ASFLAGS) -c $<.s -o $@
 # Compile to assembly first and then to object file
 %.o: %.cpp
-	$(CXX) -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION) -o $<.s -S $<
+	$(CXX) $(CXXFLAGS) -o $<.s -S $<
 	$(CC) $(ASFLAGS) -c $<.s -o $@
 
 sim: $(SIM_TARGET)
