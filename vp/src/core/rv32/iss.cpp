@@ -99,7 +99,7 @@ ISS::ISS(uint32_t hart_id, const char *output_filestr, const char *input_filestr
 	cycle_time = sc_core::sc_time(10, sc_core::SC_NS);
 
 	output_filename = output_filestr;
-	path_hashes = &input_hashes[0];
+	path_hashes = input_hashes.data();
 	input_filename = input_filestr;
 
 	assert(qt >= cycle_time);
@@ -1281,7 +1281,8 @@ void ISS::exec_step() {
 		} break;
 		case Opcode::DUMMY_R_2: {
 			printf("DUMMY_R_2 was used\n");
-			regs[instr.rd()] = -1;
+			regs[instr.rs2()] = ((uint32_t)regs[instr.rs1()]) < ((uint32_t) 1);
+			regs[instr.rd()] = regs[instr.rs1()] + regs[instr.rs2()];
 		} break;
 		case Opcode::DUMMY_R_3: {
 			printf("DUMMY_R_3 was used\n");
