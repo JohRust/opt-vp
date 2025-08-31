@@ -4,16 +4,16 @@
 #include "module.hpp"
 
 namespace nn{
-    template <typename T> class ReLU : public Module<T> {
+    class ReLU : public Module {
     public:
-        Tensor<T> forward(const Tensor<T>& input) override;
-        Tensor<T> backward(const Tensor<T>& gradOutput) override;
+        Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
+        Eigen::MatrixXf backward(const Eigen::MatrixXf& gradOutput) override;
         void update(double learningRate) override {} // No update needed for ReLU as it is not learnable
         std::string toString() override { return "ReLU"; }
         std::string getName() override { return "ReLU"; }
         virtual void serialize(FILE* file) const override {};
         virtual void deserialize(FILE* file) override {};
     private:
-        Tensor<T> input;
+        Eigen::MatrixXf input;
     };
 }

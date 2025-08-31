@@ -1,12 +1,12 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <string>
 #include <cstdio>
-#include "tensor.hpp"
+
 
 namespace nn
 {
-    template <typename T>
     /**
      * @brief The base class for all neural network modules.
      * 
@@ -28,7 +28,7 @@ namespace nn
          * @param input The input tensor to the module.
          * @return The output tensor obtained after applying the forward pass.
          */
-        virtual Tensor<T> forward(const Tensor<T>& input) = 0;
+        virtual Eigen::MatrixXf forward(const Eigen::MatrixXf& input) = 0;
 
         /**
          * @brief Performs the backward pass of the module.
@@ -39,7 +39,7 @@ namespace nn
          * @param gradOutput The gradient tensor from the next module in the network.
          * @return The gradient tensor obtained after applying the backward pass.
          */
-        virtual Tensor<T> backward(const Tensor<T>& gradOutput) = 0;
+        virtual Eigen::MatrixXf backward(const Eigen::MatrixXf& gradOutput) = 0;
 
         /**
          * @brief Updates the parameters of the module using the specified learning rate.

@@ -1,4 +1,5 @@
 #pragma once
+#include <Eigen/Dense>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -8,7 +9,6 @@
 
 namespace nn
 {
-    template <typename T>
     /**
      * @class Sequential
      * @brief Represents a sequential neural network model.
@@ -16,7 +16,7 @@ namespace nn
      * The Sequential class is responsible for managing a sequence of layers in a neural network model.
      * It provides methods for adding layers, performing forward and backward passes, and updating the model's parameters.
      */
-    class Sequential : public Module<T>{
+    class Sequential : public Module{
     public:
 
         /**
@@ -38,7 +38,7 @@ namespace nn
          * 
          * @param module A pointer to the layer to be added.
          */
-        void addLayer(Module<T>* module)
+        void addLayer(Module* module)
         {
             layers.push_back(module);
         }
@@ -49,9 +49,9 @@ namespace nn
          * @param input The input tensor to the model.
          * @return The output tensor after the forward pass.
          */
-        Tensor<T> forward(const Tensor<T>& input) override
+        Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override
         {
-            Tensor<T> output = input;
+            Eigen::MatrixXf output = input;
             for (auto layer : layers)
             {
                 output = layer->forward(output);
@@ -66,9 +66,9 @@ namespace nn
          * @param gradOutput The gradient of the loss function with respect to the model's output.
          * @return The gradient of the loss function with respect to the model's input.
          */
-        Tensor<T> backward(const Tensor<T>& gradOutput) override
+        Eigen::MatrixXf backward(const Eigen::MatrixXf& gradOutput) override
         {
-            Tensor<T> gradInput = gradOutput;
+            Eigen::MatrixXf gradInput = gradOutput;
             for (int i = layers.size() - 1; i >= 0; i--)
             {
                 gradInput = layers[i]->backward(gradInput);
@@ -141,7 +141,7 @@ namespace nn
             }
             else if (layerName == "ReLU")
             {
-                ReLU<T>* layer = new ReLU<T>();
+                ReLU* layer = new ReLU();
                 layer->deserialize(file); //Does nothing for ReLU
                 layers.push_back(layer);
             }
@@ -152,6 +152,6 @@ namespace nn
         }
 
     private:
-        std::vector<Module<T>*> layers; /**< The vector of layers in the sequential model. */
+        std::vector<Module*> layers; /**< The vector of layers in the sequential model. */
     };
 } // namespace nn

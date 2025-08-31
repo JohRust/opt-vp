@@ -1,13 +1,12 @@
 #pragma once
 
-#include "tensor.hpp"
+#include <Eigen/Dense>
 
 namespace nn {
 
-    template <typename T>
     class MSE {
     public:
-        Tensor<T> forward(const Tensor<T>& y_pred, const Tensor<T>& y_true) {
+        Eigen::VectorXf forward(const Eigen::VectorXf& y_pred, const Eigen::VectorXf& y_true) {
             this->y_pred = y_pred;
             this->y_true = y_true;
             return (y_true - y_pred).pow(2).mean(0);
@@ -26,7 +25,7 @@ namespace nn {
         }
 
     private:
-        Tensor<T> y_pred;
-        Tensor<T> y_true;
+        Eigen::VectorXf y_pred;
+        Eigen::VectorXf y_true;
     };
 }

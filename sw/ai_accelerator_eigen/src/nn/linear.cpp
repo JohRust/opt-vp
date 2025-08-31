@@ -1,4 +1,3 @@
-#include <vector>
 #include <iostream>
 #include "linear.hpp"
 
@@ -13,13 +12,13 @@ Linear::Linear(int inputSize, int outputSize)
       gradBiases(Eigen::VectorXf::Zero(outputSize)) {
 }
 
-Matrix<float, Dynamic, 1> Linear<float>::forward(const Matrix<float, Dynamic, 1>& input) {
+Eigen::Matrix<float, Dynamic, 1> Linear::forward(const Eigen::Matrix<float, Dynamic, 1>& input) {
     Matrix<float, Dynamic, 1> temp = weights * input + biases;
     this->input = input;
     return temp;
 }
 
-Matrix<float, Dynamic, 1> Linear<float>::backward(const Matrix<float, Dynamic, 1>& gradOutput) {
+Eigen::Matrix<float, Dynamic, 1> Linear::backward(const Eigen::Matrix<float, Dynamic, 1>& gradOutput) {
     auto gradInput = weights.transpose() * gradOutput;
     auto gradWeights = gradOutput * input.transpose();
     auto gradBiases = gradOutput;
@@ -37,7 +36,7 @@ Matrix<float, Dynamic, 1> Linear<float>::backward(const Matrix<float, Dynamic, 1
     return gradInput;
 }
 
-void Linear<float>::update(double learningRate) {
+void Linear::update(double learningRate) {
     this->weights += this->gradWeights * learningRate;
     this->biases += this->gradBiases * learningRate;
 }
@@ -46,7 +45,7 @@ std::string Linear<float>::toString() {
    return "Linear (" + std::to_string(weights.rows()) + " -> " + std::to_string(weights.cols()) + ")";
 }
 
-void Linear<float>::setWeights(const Matrix<float, Dynamic, Dynamic>& weights) {
+void Linear::setWeights(const Eigen::MatrixXf& weights) {
     if (weights.rows() != this->weights.rows() || weights.cols() != this->weights.cols()) {
         std::cerr << "Invalid shape for weights, needs " << this->weights.rows() << "x" << this->weights.cols() << std::endl;
         exit(1);
@@ -54,7 +53,7 @@ void Linear<float>::setWeights(const Matrix<float, Dynamic, Dynamic>& weights) {
     this->weights = weights;
 }
 
-void Linear<float>::setBiases(const Matrix<float, Dynamic, 1>& biases) {
+void Linear::setBiases(const Eigen::Matrix<float, Dynamic, 1>& biases) {
     if (biases.rows() != this->biases.rows()) {
         std::cerr << "Invalid shape for biases, needs " << this->biases.rows() << "x1" << std::endl;
         exit(1);
@@ -63,7 +62,5 @@ void Linear<float>::setBiases(const Matrix<float, Dynamic, 1>& biases) {
 }
 
 // Serialization/deserialization can be implemented as needed for Eigen matrices
-
-template class Linear<float>;
 
 } // namespace nn

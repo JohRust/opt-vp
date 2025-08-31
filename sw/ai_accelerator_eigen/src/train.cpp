@@ -1,3 +1,4 @@
+#include <Eigen/Dense>
 #include <vector>
 #include <iostream>
 #include "nn/linear.hpp"
@@ -11,7 +12,7 @@ template class Tensor<float>;
 
 int main() {
     {
-        Tensor<float> x_train({
+        Eigen::MatrixXf x_train({
             -0.2916937497932768,  -1.913280244657798,   0.3142473325952739,  0.5425600435859647,   1.5792128155073915,
             0.24196227156603412,   0.7674347291529088, -1.4785219903674274,  0.19686123586912352, -0.5622875292409727,
             1.0571222262189157,   -1.1509935774223028, -0.4694743859349521, -0.6017066122293969,  -0.22577630048653566,
@@ -23,7 +24,7 @@ int main() {
             -0.13826430117118466, -1.3281860488984305, -0.46572975357025687, 0.7384665799954104,   0.3436182895684614,
             -0.4606387709597875,   1.8522781845089378, -1.7249178325130328, -1.4247481862134568,  -0.3011036955892888},
             {50, 1});
-        Tensor<float> y_train({
+        Eigen::MatrixXf y_train({
             -7.1007793 ,  -26.3696308,   6.01969711,   6.82521875,   19.23862763,
             5.0794254,     13.01430839, -18.28848932,  3.1253583,   -8.07560092,
             15.58844893,  -14.4132228,  -6.97149564,  -10.05802046, -5.02251663,
@@ -39,11 +40,11 @@ int main() {
         //Tensor<float> x_train({0,2,4},{3,1});
         //Tensor<float> y_train({3, 6, 9},{3,1}); // W = [3.0, 0] b = 0
         //Tensor<float> y_train({1, 7, 13},{3,1}); // W = [3.0, 0] b = 1
-        auto seq = nn::Sequential<float>();
-        seq.addLayer(new nn::Linear<float>(1, 5));
-        seq.addLayer(new nn::ReLU<float>());
-        seq.addLayer(new nn::Linear<float>(5, 1));
-        auto criterion = nn::MSE<float>();
+        auto seq = nn::Sequential();
+        seq.addLayer(new nn::Linear(1, 5));
+        seq.addLayer(new nn::ReLU());
+        seq.addLayer(new nn::Linear(5, 1));
+        auto criterion = nn::MSE();
         float learning_rate = 0.001;
         int epochs = 5;
         for (int i = 0; i < epochs; i++) {

@@ -7,7 +7,6 @@ extern "C" {
 	#include "irq.h"
 	#include "syscall.h"
 }
-#include "nn/tensor.hpp"
 #include "nn/relu.hpp"
 #include "nn/linear.hpp"
 #include "nn/sequential.hpp"
@@ -23,28 +22,28 @@ int main(int argc, char **argv) {
 	init_dma();
 	// Build a sequential model
 	printf("Building model\n");
-	nn::Sequential<float> model;
-	nn::Linear<float> *linear = new nn::Linear<float>(4, 2); // Stops here
-	linear->setWeights(Tensor<float>({1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0}, {2, 4}));
-	linear->setBiases(Tensor<float>({0.0, 0.0}, {2}));
+	nn::Sequential model;
+	nn::Linear *linear = new nn::Linear(4, 2); // Stops here
+	linear->setWeights(Eigen::MatrixXf({1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0}, {2, 4}));
+	linear->setBiases(Eigen::MatrixXf({0.0, 0.0}, {2}));
 	model.addLayer(linear);
-	model.addLayer(new nn::ReLU<float>());
-	nn::Linear<float> *linear2 = new nn::Linear<float>(2, 1);
-	linear2->setWeights(Tensor<float>({1.0, 2.0}, {1, 2}));
-	linear2->setBiases(Tensor<float>({0.0}, {1}));
+	model.addLayer(new nn::ReLU());
+	nn::Linear *linear2 = new nn::Linear(2, 1);
+	linear2->setWeights(Eigen::MatrixXf({1.0, 2.0}, {1, 2}));
+	linear2->setBiases(Eigen::MatrixXf({0.0}, {1}));
 	model.addLayer(linear2);
 
 	START_TRACE;
-	Tensor<float> input_data({1.0, 2.0, 3.0, 4.0}, {1, 4});
-	Tensor<float> background_data({0.0,0.0,0.0,0.0}, {1, 4});
+	Eigen::MatrixXf input_data = (Eigen::MatrixXf(1, 4) << 1.0, 2.0, 3.0, 4.0).finished();
+	Eigen::MatrixXf background_data = (Eigen::MatrixXf(1, 4) << 0.0, 0.0, 0.0, 0.0).finished();
 	#if EXPECTED_GRAD
-	Tensor<float> shapley_values = expected_gradients<float>(model, input_data, background_data, 50);
+	Eigen::MatrixXf shapley_values = expected_gradients(model, input_data, background_data, 50);
 	STOP_TRACE;
 	printf("Shapley values:\n");
 	printf("%s\n", shapley_values.toString().c_str());
 	#endif
 	#if EXACT_SHAP
-	Tensor<float> shapley_values_exact = exact_shap<float>(model, input_data, background_data);
+	Eigen::MatrixXf shapley_values_exact = exact_shap(model, input_data, background_data);
 	STOP_TRACE;
 	printf("Exact Shapley values:\n");
 	printf("%s\n", shapley_values_exact.toString().c_str());

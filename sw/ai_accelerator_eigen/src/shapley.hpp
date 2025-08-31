@@ -1,4 +1,5 @@
 #pragma once
+#include <Eigen/Dense>
 #include <cstdint>
 #include <vector>
 #include <iostream>
@@ -6,7 +7,6 @@
 #include <ctime>
 
 #include "nn/module.hpp"
-#include "nn/tensor.hpp"
 #include "syscall.h"
 //#include "../ai_caller.h"
 
@@ -17,24 +17,23 @@
  * @param mask The mask indicating which values in the array should be replaced.
  * @param newValues The new values to replace the masked values in the array.
  */
-template <typename T>
-void replaceValues(Tensor<T>& array, const std::vector<bool>& mask, const Tensor<T>& newValues) {
-    if (mask.size() != newValues.getShape()[0]) {
-		printf("Mask and newValues must have the same length: %u != %d", mask.size(), newValues.getShape()[0]);
+void replaceValues(Eigen::MatrixXf& array, const std::vector<bool>& mask, const Eigen::MatrixXf& newValues) {
+    if (mask.size() != newValues.rows()) { // TODO check if this is correct. Maybe should be newValues.cols()
+		printf("Mask and newValues must have the same length: %u != %d", mask.size(), newValues.rows());
 		exit(1);
 	}
-	if (array.getShape()[1] != mask.size()) {
+	if (array.cols() != mask.size()) {
 		printf("Mask needs to be as long as the number of features");
 		exit(1);
 	}
 	// Replace values in the array based on the mask
-	std::vector<T> data = array.getData();
-	for (int i = 0; i < data.size(); ++i) {
-		if (!mask[i%mask.size()]) {
-			data[i] = newValues.at({i});
+	for (int i = 0; i < array.cols(); ++i) {
+		for (int j = 0; j < array.rows(); ++j) {
+			if (!mask[i]) {
+				array(j, i) = newValues(0, i);
+			}
 		}
 	}
-	array.setData(data);
 }
 
 /**
@@ -59,17 +58,16 @@ uint64_t factorial(uint64_t n);
  * @param data The input data vector.
  * @return A random vector sampled from the input data.
 */
-template <typename T>
-Tensor<T> sampleFromData(const Tensor<T> data) {
-	if (data.getRank() != 2) {
-		printf("Input data must be a 2D tensor (samples, features), is %dD", data.getRank());
+Eigen::MatrixXf sampleFromData(const Eigen::MatrixXf& data) {
+	if (data.rows() != 2) {
+		printf("Input data must be a 2D tensor (samples, features), is %dD", data.rows());
 		exit(1);
 	}
 	std::vector<float> res;
-	for (int i = 0; i < data.getShape()[1]; ++i) {
-		res.push_back(data.at({rand() % data.size(), i}));
+	for (int i = 0; i < data.cols(); ++i) {
+		res.push_back(data(rand() % data.rows(), i));
 	}
-	Tensor<T> res_tensor = Tensor<T>(res);
+	Eigen::MatrixXf res_tensor = Eigen::Map<Eigen::MatrixXf>(res.data(), 1, res.size());
 	return res_tensor;
 }
 
@@ -125,39 +123,23 @@ std::vector<float> explainPrediction(std::vector<float> input_data, float (func)
 /**
  * Explains the prediction of the model by calculating the Shapley value of every value in the input data.
  * 
- * @param input_data The input data vector.
- * @param func The function to be used for prediction.
- * @param background_data The background data vector. Optional, defaults to a vector of zeros.
- * @return The vector to store the Shapley values in.
- */
-template <typename T>
-Tensor<T> exact_shap(nn::Module<T> &model, Tensor<T> &input) {
-	Tensor<T> bgData = Tensor<T>::zeros(input.getShape());
-	return explainPrediction(input, model, bgData);
-}
-
-
-/**
- * Explains the prediction of the model by calculating the Shapley value of every value in the input data.
- * 
  * @param module The module to be used for prediction.
  * @param input The input data tensor.
  * @param background_dataset The background dataset tensor.
  * @return The tensor to store the Shapley values in.
  */
-template <typename T>
-Tensor<T> exact_shap(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &background_dataset) {
-	if (input.getRank() != 2) {
+Eigen::MatrixXf exact_shap(nn::Module &module, Eigen::MatrixXf &input, Eigen::MatrixXf &background_dataset) {
+	if (input.rows() != 2) {
 		printf("Input data must be a 2D tensor");
 		exit(1);
 	}
-	if (background_dataset.getRank() != 2) {
+	if (background_dataset.rows() != 2) {
 		printf("Background data must be a 2D tensor");
 		exit(1);
 	}
 
-	uint32_t n = input.getShape()[1];
-	Tensor<T> shapley_values = Tensor<T>::zeros(input.getShape());
+	uint32_t n = input.cols();
+	Eigen::MatrixXf shapley_values = Eigen::MatrixXf::Zero(input.rows(), n);
 	std::vector<bool> mask(n, false);
 
 	for (int feat_i = 0; feat_i < n; ++feat_i) {  // Shapley value for feature i
@@ -172,26 +154,41 @@ Tensor<T> exact_shap(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &backgro
 					subsetSize++;
 				}
 			}
-			Tensor<T> data_masked(input);
-			Tensor<T> sampled_background = sampleFromData<float>(background_dataset);
-			replaceValues<float>(data_masked, mask, sampled_background);
+			Eigen::MatrixXf data_masked(input);
+			Eigen::MatrixXf sampled_background = sampleFromData(background_dataset);
+			replaceValues(data_masked, mask, sampled_background);
 			STOP_TRACE;
 			auto pred_without_feat_i = module.forward(data_masked);
 			START_TRACE;
-			for (int i = 0; i < data_masked.getShape()[0]; ++i) {
-				data_masked.at({i, feat_i}) = input.at({i, feat_i});
+			for (int i = 0; i < data_masked.rows(); ++i) {
+				data_masked(i, feat_i) = input(i, feat_i);
 			}
 			STOP_TRACE;
 			auto pred_with_feat_i = module.forward(data_masked);
 			START_TRACE;
 			int out_idx = 0; // For now we only support one output
-			for (int i = 0; i < shapley_values.getShape()[0]; ++i) {
-				shapley_values.at({i, feat_i}) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i - pred_without_feat_i).at({out_idx, i}); //fails here
+			for (int i = 0; i < shapley_values.rows(); ++i) {
+				shapley_values(i, feat_i) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i - pred_without_feat_i)(out_idx, i);
 			}
 		}
 	}
 	return shapley_values;
 }
+
+
+/**
+ * Explains the prediction of the model by calculating the Shapley value of every value in the input data.
+ * 
+ * @param input_data The input data vector.
+ * @param func The function to be used for prediction.
+ * @param background_data The background data vector. Optional, defaults to a vector of zeros.
+ * @return The vector to store the Shapley values in.
+ */
+Eigen::MatrixXf exact_shap(nn::Module &model, Eigen::MatrixXf &input) {
+	Eigen::MatrixXf bgData = Eigen::MatrixXf::Zero(input.rows(), input.cols());
+	return exact_shap(model, input, bgData);
+}
+
 
 /***
  * Generate a random number between min and max (inclusive)
@@ -220,13 +217,12 @@ float generate_random_float(float min, float max);
  * @param n_samples The number of samples to use for the calculation.
  * @return The expected gradients of the model with respect to the input data.
  */
-template <typename T>
-Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &background_dataset, int n_samples=100){
-	if (input.getRank() != 2) {
+Eigen::MatrixXf expected_gradients(nn::Module &module, Eigen::MatrixXf &input, Eigen::MatrixXf &background_dataset, int n_samples=100){
+	if (input.rows() != 2) {
 		printf("Input data must be a 2D tensor");
 		exit(1);
 	}
-	if (background_dataset.getRank() != 2) {
+	if (background_dataset.rows() != 2) {
 		printf("Background data must be a 2D tensor");
 		exit(1);
 	}
@@ -235,30 +231,30 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 	srand(42);
 
 	// Create a tensor to store the expected gradients
-	Tensor<T> grads = Tensor<T>::zeros(input.getShape());
+	Eigen::MatrixXf grads = Eigen::MatrixXf::Zero(input.rows(), input.cols());
 
 	// Use a form of Monte Carlo estimates to calculate the expected gradients
 	// E[f(x)] = 1/N * sum(f(x_i))
 	// See https://sourav-64777.medium.com/estimating-expectations-and-gibbs-sampling-3c9e1b7e6c20
 
-	const Tensor<T> input_i = input[0]; //For now we only support one sample, but expect the input to be a 2D tensor
+	const Eigen::MatrixXf input_i = input.row(0); //For now we only support one sample, but expect the input to be a 2D tensor
 	for (int i = 0; i < n_samples; i++) {
 		float alpha = generate_random_float(0.0, 1.0);
 		// Select a random sample from the background dataset
-		int random_index = generate_random(0, background_dataset.getShape()[0] - 1);
-		const Tensor<T> random_sample = background_dataset[{random_index}];
-		Tensor<T> input_minus_random = input_i - random_sample;
-		Tensor<T> temp_sample = random_sample + (input_minus_random * alpha);
-		temp_sample.expandDims(0);
+		int random_index = generate_random(0, background_dataset.rows() - 1);
+		const Eigen::MatrixXf random_sample = background_dataset.row(random_index);
+		Eigen::MatrixXf input_minus_random = input_i - random_sample;
+		Eigen::MatrixXf temp_sample = random_sample + (input_minus_random * alpha);
+		temp_sample.conservativeResize(1, Eigen::NoChange);
 		STOP_TRACE;
-		Tensor<T> pred_current = module.forward(temp_sample);
+		Eigen::MatrixXf pred_current = module.forward(temp_sample);
 		//We want to calculate the gradient of the output with respect to the input, not the gradient of the loss with respect to the input.
 		//So we can just pass in a tensor of ones as the gradOutput.
-		Tensor<T> current_grad = module.backward(Tensor<T>({1}, pred_current.getShape()));
+		Eigen::MatrixXf current_grad = module.backward(Eigen::MatrixXf::Ones(pred_current.rows(), pred_current.cols()));
 		//printf("Random Idx: %u, input_minus_random: %s, Current grad: %s, temp_sample: %s\n", random_index, input_minus_random.toString().c_str(), current_grad.toString().c_str(), temp_sample.toString().c_str());
 		START_TRACE;
-		input_minus_random.expandDims(0);
-		grads = grads + input_minus_random.mul(current_grad);
+		input_minus_random.conservativeResize(1, Eigen::NoChange);
+		grads = grads + input_minus_random.cwiseProduct(current_grad);
 	}
 	grads = grads / n_samples;
 	return grads;
