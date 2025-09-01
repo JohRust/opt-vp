@@ -9,10 +9,10 @@ namespace nn {
         Eigen::VectorXf forward(const Eigen::VectorXf& y_pred, const Eigen::VectorXf& y_true) {
             this->y_pred = y_pred;
             this->y_true = y_true;
-            return (y_true - y_pred).pow(2).mean(0);
+            return (y_true - y_pred).pow(2).rowwise().mean();
         }
 
-        Tensor<T> backward() {
+        Eigen::VectorXf backward() {
             return (y_true - y_pred) * 2;
         }
 

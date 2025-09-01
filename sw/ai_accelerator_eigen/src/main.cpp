@@ -21,16 +21,21 @@ void *__dso_handle = 0;
 int main(int argc, char **argv) {
 	init_dma();
 	// Build a sequential model
-	printf("Building model\n");
+	std::cout << "Building model\n" << std::endl;
 	nn::Sequential model;
-	nn::Linear *linear = new nn::Linear(4, 2); // Stops here
-	linear->setWeights(Eigen::MatrixXf({1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0}, {2, 4}));
-	linear->setBiases(Eigen::MatrixXf({0.0, 0.0}, {2}));
+	nn::Linear *linear = new nn::Linear(4, 2);
+	Eigen::MatrixXf weights(2, 4);
+	weights << 1.0, 2.0, 3.0, 4.0,
+			   1.0, 2.0, 3.0, 4.0;
+	linear->setWeights(weights);
+	linear->setBiases(Eigen::VectorXf::Zero(2));
 	model.addLayer(linear);
 	model.addLayer(new nn::ReLU());
 	nn::Linear *linear2 = new nn::Linear(2, 1);
-	linear2->setWeights(Eigen::MatrixXf({1.0, 2.0}, {1, 2}));
-	linear2->setBiases(Eigen::MatrixXf({0.0}, {1}));
+	Eigen::MatrixXf weights2(1, 2);
+	weights2 << 1.0, 2.0;
+	linear2->setWeights(weights2);
+	linear2->setBiases(Eigen::VectorXf::Zero(1));
 	model.addLayer(linear2);
 
 	START_TRACE;
@@ -39,19 +44,17 @@ int main(int argc, char **argv) {
 	#if EXPECTED_GRAD
 	Eigen::MatrixXf shapley_values = expected_gradients(model, input_data, background_data, 50);
 	STOP_TRACE;
-	printf("Shapley values:\n");
-	printf("%s\n", shapley_values.toString().c_str());
+	std::cout << "Shapley values:\n" << shapley_values << std::endl;
 	#endif
 	#if EXACT_SHAP
 	Eigen::MatrixXf shapley_values_exact = exact_shap(model, input_data, background_data);
 	STOP_TRACE;
-	printf("Exact Shapley values:\n");
-	printf("%s\n", shapley_values_exact.toString().c_str());
+	std::cout << "Exact Shapley values:\n" << shapley_values_exact << std::endl;
 	#endif
 
-	Tensor<float> preds = model.forward(input_data);
-	printf("Predictions: %s\n", preds.toString().c_str());
+	Eigen::MatrixXf preds = model.forward(input_data);
+	std::cout << "Predictions: " << preds << std::endl;
 	float expected_value = model.forward(background_data).mean();
-	printf("Expected value: %f\n", expected_value);
+	std::cout << "Expected value: " << expected_value << std::endl;
 	return 0;
 }

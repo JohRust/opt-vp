@@ -7,8 +7,8 @@ namespace nn{
    class Linear : public Module {
     public:
         Linear(int inputSize, int outputSize);
-        Eigen::VectorXf forward(const Eigen::VectorXf& input) override;
-        Eigen::VectorXf backward(const Eigen::VectorXf& gradOutput) override;
+        Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override;
+        Eigen::MatrixXf backward(const Eigen::MatrixXf& gradOutput) override;
         void update(double learningRate) override;
         std::string toString() override;
         std::string getName() override { return "Linear"; }

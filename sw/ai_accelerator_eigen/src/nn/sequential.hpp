@@ -135,7 +135,7 @@ namespace nn
             std::string layerName(name); //Automatically stops at the null character
             if (layerName == "Linear")
             {
-                Linear<T>* layer = new Linear<T>(0, 0);
+                Linear* layer = new Linear(0, 0);
                 layer->deserialize(file); //Issue here
                 layers.push_back(layer);
             }

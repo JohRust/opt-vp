@@ -4,15 +4,6 @@ extern "C" {
 	#include "syscall.h"
 }
 
-// old version
-void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, const std::vector<float>& newValues) {
-	// Replace values in the array based on the mask
-	for (std::size_t i = 0; i < array.size(); ++i) {
-		if (!mask[i]) {
-			array[i] = newValues[i];
-		}
-	}
-}
 
 uint32_t binomialCoeff(uint32_t n, uint32_t k) {
 //#define BINCOEFF_SYSCALL
@@ -41,15 +32,6 @@ uint64_t factorial(uint64_t n) {
 	uint64_t res = 1;
 	for (uint32_t i = 1; i <= n; ++i) {
 		res *= i;
-	}
-	return res;
-}
-
-// old version
-std::vector<float> sampleFromData(const std::vector<std::vector<float>> data) {
-	std::vector<float> res;
-	for (std::size_t i=0; i < data[0].size(); ++i) {
-		res.push_back(data[rand() % data.size()][i]);
 	}
 	return res;
 }

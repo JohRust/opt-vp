@@ -36,14 +36,6 @@ void replaceValues(Eigen::MatrixXf& array, const std::vector<bool>& mask, const 
 	}
 }
 
-/**
- * (Old version) Replaces values in the given array based on the provided mask and new values.
- *
- * @param array The array of float values to be modified.
- * @param mask The mask indicating which values in the array should be replaced.
- * @param newValues The new values to replace the masked values in the array.
- */
-void replaceValues(std::vector<float>& array, const std::vector<bool>& mask, const std::vector<float>& newValues);
 
 /**
  * Calculates the factorial of a given number.
@@ -70,11 +62,6 @@ Eigen::MatrixXf sampleFromData(const Eigen::MatrixXf& data) {
 	Eigen::MatrixXf res_tensor = Eigen::Map<Eigen::MatrixXf>(res.data(), 1, res.size());
 	return res_tensor;
 }
-
-/**
- * (Old version) Creates a new vector by sampling each feature from a vector in the input data.
- */
-std::vector<float> sampleFromData(const std::vector<std::vector<float>> data);
 
 /**
  * Calculates the binomial coefficient.
@@ -107,6 +94,23 @@ float shapleyFrequency(uint32_t n, uint32_t s);
  */
 std::vector<bool> getAsBoolVector(uint32_t n, uint16_t length);
 
+/***
+ * Generate a random number between min and max (inclusive)
+ * 
+ * @param min The minimum value of the random number.
+ * @param max The maximum value of the random number.
+ * @return The random number generated.
+ */
+int generate_random(int min, int max);
+
+/**
+ * Generates a random float between min and max.
+ * 
+ * @param min The minimum value of the random number.
+ * @param max The maximum value of the random number.
+ * @return The random number generated.
+ */
+float generate_random_float(float min, float max);
 
 /**
  * (Old version)Explains the prediction of the model by calculating the Shapley value of every value in the input data.
@@ -189,24 +193,6 @@ Eigen::MatrixXf exact_shap(nn::Module &model, Eigen::MatrixXf &input) {
 	return exact_shap(model, input, bgData);
 }
 
-
-/***
- * Generate a random number between min and max (inclusive)
- * 
- * @param min The minimum value of the random number.
- * @param max The maximum value of the random number.
- * @return The random number generated.
- */
-int generate_random(int min, int max);
-
-/**
- * Generates a random float between min and max.
- * 
- * @param min The minimum value of the random number.
- * @param max The maximum value of the random number.
- * @return The random number generated.
- */
-float generate_random_float(float min, float max);
 
 /**
  * Calculates the expected gradients of the model with respect to the input data.
