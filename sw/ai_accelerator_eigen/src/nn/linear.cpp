@@ -61,6 +61,23 @@ void Linear::setBiases(const Eigen::VectorXf& biases) {
     this->biases = biases;
 }
 
-// Serialization/deserialization can be implemented as needed for Eigen matrices
+void Linear::serialize(FILE* file) const {
+    int n_rows = weights.rows();
+    int n_cols = weights.cols();
+    fwrite(&n_rows, sizeof(int), 1, file);
+    fwrite(&n_cols, sizeof(int), 1, file);
+    fwrite(weights.data(), sizeof(float), weights.size(), file);
+    fwrite(biases.data(), sizeof(float), biases.size(), file);
+}
+
+void Linear::deserialize(FILE* file) {
+    int rows, cols;
+    fread(&rows, sizeof(int), 1, file);
+    fread(&cols, sizeof(int), 1, file);
+    weights.resize(rows, cols);
+    fread(weights.data(), sizeof(float), weights.size(), file);
+    biases.resize(rows);
+    fread(biases.data(), sizeof(float), biases.size(), file);
+}
 
 } // namespace nn

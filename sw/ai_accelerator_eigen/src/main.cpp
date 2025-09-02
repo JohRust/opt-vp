@@ -21,7 +21,7 @@ void *__dso_handle = 0;
 int main(int argc, char **argv) {
 	init_dma();
 	// Build a sequential model
-	std::cout << "Building model\n" << std::endl;
+	//std::cout << "Building model\n" << std::endl;
 	nn::Sequential model;
 	nn::Linear *linear = new nn::Linear(4, 2);
 	Eigen::MatrixXf weights(2, 4);
