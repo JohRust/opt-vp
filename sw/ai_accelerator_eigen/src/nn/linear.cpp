@@ -13,8 +13,9 @@ Linear::Linear(int inputSize, int outputSize)
 }
 
 Eigen::MatrixXf Linear::forward(const Eigen::MatrixXf& input) {
-    Eigen::MatrixXf temp = weights * input + biases;
     this->input = input;
+    Eigen::MatrixXf temp = input * weights.transpose();
+    temp.rowwise() += biases.transpose();
     return temp;
 }
 

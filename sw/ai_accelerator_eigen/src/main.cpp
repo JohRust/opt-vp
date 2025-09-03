@@ -49,12 +49,18 @@ int main(int argc, char **argv) {
 	#if EXACT_SHAP
 	Eigen::MatrixXf shapley_values_exact = exact_shap(model, input_data, background_data);
 	STOP_TRACE;
-	std::cout << "Exact Shapley values:\n" << shapley_values_exact << std::endl;
+	std::stringstream ss;
+	ss << shapley_values_exact;
+	printf("Exact Shapley values:\n%s\n", ss.str().c_str());
 	#endif
 
 	Eigen::MatrixXf preds = model.forward(input_data);
-	std::cout << "Predictions: " << preds << std::endl;
+	ss.str("");
+	ss << preds;
+	printf("Predictions:\n%s\n", ss.str().c_str());
 	float expected_value = model.forward(background_data).mean();
-	std::cout << "Expected value: " << expected_value << std::endl;
+	ss.str("");
+	ss << expected_value;
+	printf("Expected value:\n%s\n", ss.str().c_str());
 	return 0;
 }

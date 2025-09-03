@@ -6,7 +6,7 @@ extern "C" {
 
 
 void replaceValues(Eigen::MatrixXf& array, const std::vector<bool>& mask, const Eigen::MatrixXf& newValues) {
-    if (mask.size() != newValues.rows()) { // TODO check if this is correct. Maybe should be newValues.cols()
+    if (mask.size() != newValues.cols()) { // TODO check if this is correct. Maybe should be newValues.cols()
 		printf("Mask and newValues must have the same length: %u != %d", mask.size(), newValues.rows());
 		exit(1);
 	}
