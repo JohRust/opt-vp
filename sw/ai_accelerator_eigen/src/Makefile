@@ -3,9 +3,9 @@ OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
 
-TARGET_ARCH = rv32gc
+TARGET_ARCH = rv32imafd
 TARGET_ABI  = ilp32d
-OPTIMIZATION = -O1 -g
+OPTIMIZATION = -O3 -g
 
 CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION) -I eigen-3.4.0
 CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION) -I eigen-3.4.0

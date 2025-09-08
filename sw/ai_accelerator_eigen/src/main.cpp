@@ -41,15 +41,16 @@ int main(int argc, char **argv) {
 	START_TRACE;
 	Eigen::MatrixXf input_data = (Eigen::MatrixXf(1, 4) << 1.0, 2.0, 3.0, 4.0).finished();
 	Eigen::MatrixXf background_data = (Eigen::MatrixXf(1, 4) << 0.0, 0.0, 0.0, 0.0).finished();
+	std::stringstream ss;
 	#if EXPECTED_GRAD
 	Eigen::MatrixXf shapley_values = expected_gradients(model, input_data, background_data, 50);
 	STOP_TRACE;
-	std::cout << "Shapley values:\n" << shapley_values << std::endl;
+	ss << shapley_values;
+	printf("Expected gradients Shapley values:\n%s\n", ss.str().c_str());
 	#endif
 	#if EXACT_SHAP
 	Eigen::MatrixXf shapley_values_exact = exact_shap(model, input_data, background_data);
 	STOP_TRACE;
-	std::stringstream ss;
 	ss << shapley_values_exact;
 	printf("Exact Shapley values:\n%s\n", ss.str().c_str());
 	#endif
