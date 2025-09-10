@@ -17,38 +17,45 @@ void *__dso_handle = 0;
 
 #define EXACT_SHAP 1
 #define EXPECTED_GRAD 0
+#define N_FEATURES 5
+#define HIDDEN_SIZE 2
 
 int main(int argc, char **argv) {
 	init_dma();
 	// Build a sequential model
 	//std::cout << "Building model\n" << std::endl;
 	nn::Sequential model;
-	nn::Linear *linear = new nn::Linear(4, 2);
-	Eigen::MatrixXf weights(2, 4);
-	weights << 1.0, 2.0, 3.0, 4.0,
-			   1.0, 2.0, 3.0, 4.0;
+	nn::Linear *linear = new nn::Linear(N_FEATURES, HIDDEN_SIZE);
+	Eigen::MatrixXf weights(HIDDEN_SIZE, N_FEATURES);
+	weights << 1.0, 2.0, 3.0, 4.0, 5.0,
+			   1.0, 2.0, 3.0, 4.0, 5.0;
 	linear->setWeights(weights);
-	linear->setBiases(Eigen::VectorXf::Zero(2));
+	linear->setBiases(Eigen::VectorXf::Zero(HIDDEN_SIZE));
 	model.addLayer(linear);
 	model.addLayer(new nn::ReLU());
-	nn::Linear *linear2 = new nn::Linear(2, 1);
-	Eigen::MatrixXf weights2(1, 2);
+	nn::Linear *linear2 = new nn::Linear(HIDDEN_SIZE, 1);
+	Eigen::MatrixXf weights2(1, HIDDEN_SIZE);
 	weights2 << 1.0, 2.0;
 	linear2->setWeights(weights2);
 	linear2->setBiases(Eigen::VectorXf::Zero(1));
 	model.addLayer(linear2);
 
-	START_TRACE;
-	Eigen::MatrixXf input_data = (Eigen::MatrixXf(1, 4) << 1.0, 2.0, 3.0, 4.0).finished();
-	Eigen::MatrixXf background_data = (Eigen::MatrixXf(1, 4) << 0.0, 0.0, 0.0, 0.0).finished();
+	// Create random input data matrix of size 1x4 with values between 0 and 10
+	//Eigen::MatrixXf input_data = (Eigen::MatrixXf(1, 4) << 1.0, 2.0, 3.0, 4.0).finished();
+	Eigen::MatrixXf input_data = Eigen::MatrixXf::Random(1, N_FEATURES) * 10.0;
+	Eigen::MatrixXf background_data = Eigen::MatrixXf::Zero(1, N_FEATURES);
 	std::stringstream ss;
+	
 	#if EXPECTED_GRAD
+	START_TRACE;
 	Eigen::MatrixXf shapley_values = expected_gradients(model, input_data, background_data, 50);
 	STOP_TRACE;
 	ss << shapley_values;
 	printf("Expected gradients Shapley values:\n%s\n", ss.str().c_str());
 	#endif
+
 	#if EXACT_SHAP
+	START_TRACE;
 	Eigen::MatrixXf shapley_values_exact = exact_shap(model, input_data, background_data);
 	STOP_TRACE;
 	ss << shapley_values_exact;
