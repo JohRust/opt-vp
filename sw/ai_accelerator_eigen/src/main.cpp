@@ -15,10 +15,11 @@ extern "C" {
 // Otherwise linking fails.
 void *__dso_handle = 0;
 
-#define EXACT_SHAP 1
-#define EXPECTED_GRAD 0
 #define N_FEATURES 5
 #define HIDDEN_SIZE 2
+
+#define EXACT_SHAP 0
+#define EXPECTED_GRAD 1
 
 int main(int argc, char **argv) {
 	init_dma();
