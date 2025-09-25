@@ -5,7 +5,7 @@ OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wil
 
 TARGET_ARCH = rv32imafd
 TARGET_ABI  = ilp32d
-OPTIMIZATION = -O1
+OPTIMIZATION = -O3 -g
 
 CFLAGS   = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION)
 CXXFLAGS = -march=$(TARGET_ARCH) -mabi=$(TARGET_ABI) $(OPTIMIZATION)
