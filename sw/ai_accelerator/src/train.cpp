@@ -1,15 +1,25 @@
 #include <vector>
 #include <iostream>
+extern "C" {
+	#include "irq.h"
+	#include "syscall.h"
+}
+#include "ai_caller.hpp"
 #include "nn/linear.hpp"
 #include "nn/relu.hpp"
 #include "nn/module.hpp"
 #include "nn/linear.hpp"
 #include "nn/sequential.hpp"
 #include "nn/loss.hpp"
+#include "nn/tensor.hpp"
 
-template class Tensor<float>;
+
+// We need to tell the C++ runtime that we don't have dynamic shared objects.
+// Otherwise linking fails.
+void *__dso_handle = 0;
 
 int main() {
+    init_dma();
     {
         Tensor<float> x_train({
             -0.2916937497932768,  -1.913280244657798,   0.3142473325952739,  0.5425600435859647,   1.5792128155073915,
@@ -45,13 +55,13 @@ int main() {
         seq.addLayer(new nn::Linear<float>(5, 1));
         auto criterion = nn::MSE<float>();
         float learning_rate = 0.001;
-        int epochs = 5;
+        int epochs = 20;
         for (int i = 0; i < epochs; i++) {
             auto y_pred = seq.forward(x_train);
             //std::cout << "\ny_pred: " << y_pred.toString() << std::endl;
             auto loss = criterion.forward(y_pred, y_train);
 
-            std::cout << "Loss at iteration " << i << ": " << loss.mean() << ", learning rate: " << learning_rate << std::endl;
+            printf("Loss at iteration %d: %f, learning rate: %f\n", i, loss.mean(), learning_rate);
             auto loss_grad = criterion.backward();
             auto grad = seq.backward(loss_grad);
             seq.update(learning_rate);

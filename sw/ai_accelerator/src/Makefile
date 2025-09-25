@@ -1,4 +1,4 @@
-OBJECTS  = main.o shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
+OBJECTS  = shapley.o bootstrap.o irq.o ai_caller.o ai_accelerator.o
 # All object files in nn directory
 OBJECTS += $(patsubst %.cpp, %.o,$(wildcard nn/*.cpp)) $(patsubst %.c, %.o,$(wildcard nn/*.c))
 
@@ -25,9 +25,12 @@ VP ?= riscv-vp
 VP_FLAGS ?= --intercept-syscalls --error-on-zero-traphandler=true
 
 EXECUTABLE ?= main
-OBJECTS ?= main.o
 
-$(EXECUTABLE): $(OBJECTS)
+$(EXECUTABLE): main.o $(OBJECTS)
+	$(LD) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+TRAIN_EXECUTABLE ?= train
+$(TRAIN_EXECUTABLE): train.o $(OBJECTS)
 	$(LD) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 %.o: %.S
