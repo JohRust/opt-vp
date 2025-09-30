@@ -9,7 +9,7 @@ namespace nn {
         Eigen::VectorXf forward(const Eigen::VectorXf& y_pred, const Eigen::VectorXf& y_true) {
             this->y_pred = y_pred;
             this->y_true = y_true;
-            return (y_true - y_pred).pow(2).rowwise().mean();
+            return (y_true - y_pred).array().square().matrix();
         }
 
         Eigen::VectorXf backward() {

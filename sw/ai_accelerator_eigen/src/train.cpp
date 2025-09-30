@@ -45,24 +45,25 @@ int main() {
             -0.17298203,  -15.97363469, -8.35967634,   9.78820595,   4.05138121,
             -11.80186827,  27.59050933, -26.38393062, -20.19988157, -4.97893194; // Should result in w = 14.361464, b=0.321602 with loss=186.979. The rest is noise.
 
-        //Tensor<float> x_train({0,2,4},{3,1});
-        //Tensor<float> y_train({3, 6, 9},{3,1}); // W = [3.0, 0] b = 0
-        //Tensor<float> y_train({1, 7, 13},{3,1}); // W = [3.0, 0] b = 1
+        //Eigen::MatrixXf x_train({3,1});
+        //x_train << 0, 2, 4;
+        //Eigen::MatrixXf y_train({3,1}); // W = [3.0, 0] b = 0
+        //y_train << 0, 6, 12;
         auto seq = nn::Sequential();
         seq.addLayer(new nn::Linear(1, 5));
         seq.addLayer(new nn::ReLU());
         seq.addLayer(new nn::Linear(5, 1));
-        auto criterion = nn::MSE();
+
+        nn::MSE criterion = nn::MSE();
         float learning_rate = 0.001;
         int epochs = 20;
         for (int i = 0; i < epochs; i++) {
-            auto y_pred = seq.forward(x_train);
-            //std::cout << "\ny_pred: " << y_pred.toString() << std::endl;
-            auto loss = criterion.forward(y_pred, y_train);
+            Eigen::MatrixXf y_pred = seq.forward(x_train);
+            Eigen::MatrixXf loss = criterion.forward(y_pred, y_train);
 
             printf("Loss at iteration %d: %f, learning rate: %f\n", i, loss.mean(), learning_rate);
-            auto loss_grad = criterion.backward();
-            auto grad = seq.backward(loss_grad);
+            Eigen::MatrixXf loss_grad = criterion.backward();
+            Eigen::MatrixXf grad = seq.backward(loss_grad);
             seq.update(learning_rate);
             //learning_rate *= 0.99; // learning rate decay
         }

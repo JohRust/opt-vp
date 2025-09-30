@@ -20,9 +20,9 @@ Eigen::MatrixXf Linear::forward(const Eigen::MatrixXf& input) {
 }
 
 Eigen::MatrixXf Linear::backward(const Eigen::MatrixXf& gradOutput) {
-    Eigen::MatrixXf gradInput = gradOutput * weights;
-    auto gradWeights = input.transpose() * gradOutput;
-    auto gradBiases = gradOutput.rowwise().sum();
+    Eigen::MatrixXf gradInput = gradOutput * weights; // gradInput = (batch_size, output_size) * (output_size, input_size) = (batch_size, input_size)
+    Eigen::MatrixXf gradWeights = gradOutput.transpose() * input; // gradWeights = (batch_size, output_size)^T * (batch_size, input_size) = (output_size, input_size)
+    Eigen::MatrixXf gradBiases = gradOutput.transpose().rowwise().sum(); // gradBiases = sum over rows of (batch_size, output_size)^T = (output_size)
     #ifdef LIN_DEBUG
     std::cout << "--------" << std::endl;
     std::cout << "input:\n" << input.transpose() << std::endl;
@@ -32,6 +32,7 @@ Eigen::MatrixXf Linear::backward(const Eigen::MatrixXf& gradOutput) {
     std::cout << "gradWeights:\n" << gradWeights << std::endl;
     std::cout << "gradBiases:\n" << gradBiases.transpose() << std::endl;
     #endif
+    assert(gradWeights.rows() == this->gradWeights.rows() && gradWeights.cols() == this->gradWeights.cols());
     this->gradWeights = gradWeights;
     this->gradBiases = gradBiases;
     return gradInput;
