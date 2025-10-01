@@ -51,7 +51,7 @@ dump-code: $(EXECUTABLE)
 	$(RISCV_PREFIX)objdump -D main
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) $(CLEAN_EXTRA)
+	rm -f $(OBJECTS) $(EXECUTABLE) $(CLEAN_EXTRA) main.o train.o $(TRAIN_EXECUTABLE)
 
 .PHONY: sim sim-default dump-elf dump-code clean
 .DEFAULT_GOAL := $(EXECUTABLE)

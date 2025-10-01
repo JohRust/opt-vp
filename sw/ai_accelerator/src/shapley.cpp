@@ -57,11 +57,11 @@ std::vector<float> sampleFromData(const std::vector<std::vector<float>> data) {
 
 float shapleyFrequency(uint32_t n, uint32_t s) {
 	// Calculate the frequency of feature i in the shapley value calculation.
-	// Equvalent to (n-s-1)! * s! / n!, but without overflow
+	// Equvalent to ((n-s-1)! * s! / n!)^-1, but without overflow
 	if (n - s <= 0) {
 		return 0;
 	}
-	return 1.0f / (binomialCoeff(n, s) * (n - s));
+	return binomialCoeff(n, s) * (n - s);
 }
 
 
@@ -112,7 +112,7 @@ std::vector<float> explainPrediction(std::vector<float> input_data, float (func)
 			
 			data_masked[i] = input_data[i];
 			auto pred_with_i = func(&data_masked[0], data_masked.size());
-			shapley_values[i] += shapleyFrequency(n, subsetSize) * (pred_with_i - pred_without_i);
+			shapley_values[i] += (pred_with_i - pred_without_i) / shapleyFrequency(n, subsetSize);
 		}
 	}
 	return shapley_values;

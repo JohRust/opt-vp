@@ -68,11 +68,11 @@ Eigen::MatrixXf sampleFromData(const Eigen::MatrixXf& data) {
 
 float shapleyFrequency(uint32_t n, uint32_t s) {
 	// Calculate the frequency of feature i in the shapley value calculation.
-	// Equvalent to (n-s-1)! * s! / n!, but without overflow
+	// Equvalent to ((n-s-1)! * s! / n!)^-1, but without overflow
 	if (n - s <= 0) {
 		return 0;
 	}
-	return 1.0f / (binomialCoeff(n, s) * (n - s));
+	return (binomialCoeff(n, s) * (n - s));
 }
 
 
@@ -126,7 +126,7 @@ Eigen::MatrixXf exact_shap(nn::Module &module, Eigen::MatrixXf &input, Eigen::Ma
 			START_TRACE;
 			int out_idx = 0; // For now we only support one output
 			for (int i = 0; i < shapley_values.rows(); ++i) {
-				shapley_values(i, feat_i) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i - pred_without_feat_i)(out_idx, i);
+				shapley_values(i, feat_i) += (pred_with_feat_i - pred_without_feat_i)(out_idx, i) / shapleyFrequency(n, subsetSize)
 			}
 		}
 	}

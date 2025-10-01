@@ -175,16 +175,16 @@ Tensor<T> exact_shap(nn::Module<T> &module, Tensor<T> &input, Tensor<T> &backgro
 			Tensor<T> sampled_background = sampleFromData<T>(background_dataset);
 			replaceValues<T>(data_masked, mask, sampled_background);
 
-			auto pred_without_feat_i = module.forward(data_masked);
+			Tensor<T> pred_without_feat_i = module.forward(data_masked);
 
 			for (int i = 0; i < data_masked.getShape()[0]; ++i) {
 				data_masked.at({i, feat_i}) = input.at({i, feat_i});
 			}
-			auto pred_with_feat_i = module.forward(data_masked);
+			Tensor<T> pred_with_feat_i = module.forward(data_masked);
 
 			int out_idx = 0; // For now we only support one output
 			for (int i = 0; i < shapley_values.getShape()[0]; ++i) {
-				shapley_values.at({i, feat_i}) += shapleyFrequency(n, subsetSize) * (pred_with_feat_i - pred_without_feat_i).at({out_idx, i}); //fails here
+				shapley_values.at({i, feat_i}) += (pred_with_feat_i - pred_without_feat_i).at({out_idx, i}) / shapleyFrequency(n, subsetSize);
 			}
 		}
 	}
