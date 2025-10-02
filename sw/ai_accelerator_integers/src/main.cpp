@@ -19,6 +19,8 @@ extern "C" {
 // Otherwise linking fails.
 void *__dso_handle = 0;
 
+const int QUANT_SCALE = 256;
+
 int main(int argc, char **argv) {
 	init_dma();
 	// Build a sequential model
@@ -34,18 +36,18 @@ int main(int argc, char **argv) {
 	linear2->setBiases(Tensor<NUM_TYPE>({0}, {1}));
 	model.addLayer(linear2);
 
-	Tensor<NUM_TYPE> input_data({1, 2, 3, 4}, {1, 4});
-	Tensor<NUM_TYPE> background_data({0, 0, 0, 0}, {1, 4});
-	Tensor<NUM_TYPE> shapley_values = expected_gradients<NUM_TYPE>(model, input_data, background_data, 50);
-	Tensor<NUM_TYPE> shapley_values_exact = exact_shap<NUM_TYPE>(model, input_data, background_data);
+	Tensor<NUM_TYPE> input_data = Tensor<NUM_TYPE>({1, 2, 3, 4}, {1, 4}) * QUANT_SCALE;
+	Tensor<NUM_TYPE> background_data = Tensor<NUM_TYPE>({0, 0, 0, 0}, {1, 4}) * QUANT_SCALE;
+	Tensor<NUM_TYPE> shapley_values = expected_gradients<NUM_TYPE>(model, input_data, background_data, 50) / QUANT_SCALE;
+	Tensor<NUM_TYPE> shapley_values_exact = exact_shap<NUM_TYPE>(model, input_data, background_data) / QUANT_SCALE;
 	printf("Shapley values:\n");
 	printf("%s\n", shapley_values.toString().c_str());
 	printf("Exact Shapley values:\n");
 	printf("%s\n", shapley_values_exact.toString().c_str());
 
-	Tensor<NUM_TYPE> preds = model.forward(input_data);
+	Tensor<NUM_TYPE> preds = model.forward(input_data) / QUANT_SCALE;
 	printf("Predictions: %s\n", preds.toString().c_str());
-	NUM_TYPE expected_value = model.forward(background_data).mean();
+	NUM_TYPE expected_value = model.forward(background_data).mean() / QUANT_SCALE;
 	printf("Expected value: %d\n", expected_value);
 	return 0;
 }
