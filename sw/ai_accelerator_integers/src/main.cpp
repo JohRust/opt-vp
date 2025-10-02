@@ -19,7 +19,7 @@ extern "C" {
 // Otherwise linking fails.
 void *__dso_handle = 0;
 
-const int QUANT_SCALE = 256;
+const int QUANT_SCALE = 32;
 
 int main(int argc, char **argv) {
 	init_dma();

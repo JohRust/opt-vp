@@ -192,8 +192,19 @@ Tensor<T> Tensor<T>::operator*(const Tensor<T>& other) const {
 template <typename T>
 Tensor<T> Tensor<T>::operator*(const T scalar) const {
     std::vector<T> result_data;
+    result_data.reserve(data.size());
     for (int i = 0; i < data.size(); i++) {
         result_data.push_back(data[i] * scalar);
+    }
+    return Tensor(result_data, shape);
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::multiply_float(const float scalar) const {
+    std::vector<T> result_data;
+    result_data.reserve(data.size());
+    for (int i = 0; i < data.size(); i++) {
+        result_data.push_back(static_cast<T>(data[i] * scalar));
     }
     return Tensor(result_data, shape);
 }

@@ -161,6 +161,17 @@ class Tensor {
         Tensor<T> operator*(const T scalar) const;
 
         /**
+         * @brief Multiplies the tensor by a float scalar value.
+         *
+         * @tparam T The data type of the tensor.
+         * @param scalar The float scalar value to multiply the tensor by.
+         * @return A new tensor resulting from the element-wise multiplication of the original tensor and the float scalar value.
+         * 
+         * This function is specifically for multiplying with float scalars to avoid ambiguity with integer types.
+         */
+        Tensor<T> multiply_float(const float scalar) const;
+
+        /**
          * @brief perform an element-wise division.
          * 
          * @param other The tensor to divide with. 

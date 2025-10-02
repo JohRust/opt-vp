@@ -247,16 +247,16 @@ Tensor<T> expected_gradients(nn::Module<T> &module, Tensor<T> &input, Tensor<T> 
 		int random_index = generate_random(0, background_dataset.getShape()[0] - 1);
 		const Tensor<T> random_sample = background_dataset[{random_index}];
 		Tensor<T> input_minus_random = input_i - random_sample;
-		Tensor<T> temp_sample = random_sample + (input_minus_random * alpha);
+		Tensor<T> temp_sample = random_sample + (input_minus_random.multiply_float(alpha));
 		temp_sample.expandDims(0);
 		Tensor<T> pred_current = module.forward(temp_sample);
 		//We want to calculate the gradient of the output with respect to the input, not the gradient of the loss with respect to the input.
 		//So we can just pass in a tensor of ones as the gradOutput.
 		Tensor<T> current_grad = module.backward(Tensor<T>({1}, pred_current.getShape()));
-		//printf("Random Idx: %u, input_minus_random: %s, Current grad: %s, temp_sample: %s\n", random_index, input_minus_random.toString().c_str(), current_grad.toString().c_str(), temp_sample.toString().c_str());
+		printf("Random Idx: %u, input_minus_random: %s, Current grad: %s, temp_sample: %s, grads: %s\n", random_index, (input_minus_random.multiply_float(alpha)).toString().c_str(), current_grad.toString().c_str(), temp_sample.toString().c_str(), grads.toString().c_str());
 		input_minus_random.expandDims(0);
-		grads = grads + input_minus_random.mul(current_grad);
+		grads = grads + (input_minus_random.mul(current_grad) / n_samples);
 	}
-	grads = grads / n_samples;
+	//grads = grads / n_samples;
 	return grads;
 }

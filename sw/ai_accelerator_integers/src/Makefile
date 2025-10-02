@@ -53,7 +53,9 @@ dump-code: $(EXECUTABLE)
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(CLEAN_EXTRA) main.o train.o $(TRAIN_EXECUTABLE)
 
+all: $(EXECUTABLE) $(TRAIN_EXECUTABLE)
+
 .PHONY: sim sim-default dump-elf dump-code clean
-.DEFAULT_GOAL := $(EXECUTABLE)
+.DEFAULT_GOAL := all
 
 ########################################################################
