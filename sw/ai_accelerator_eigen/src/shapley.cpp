@@ -126,7 +126,7 @@ Eigen::MatrixXf exact_shap(nn::Module &module, Eigen::MatrixXf &input, Eigen::Ma
 			START_TRACE;
 			int out_idx = 0; // For now we only support one output
 			for (int i = 0; i < shapley_values.rows(); ++i) {
-				shapley_values(i, feat_i) += (pred_with_feat_i - pred_without_feat_i)(out_idx, i) / shapleyFrequency(n, subsetSize)
+				shapley_values(i, feat_i) += (pred_with_feat_i - pred_without_feat_i)(out_idx, i) / shapleyFrequency(n, subsetSize);
 			}
 		}
 	}
