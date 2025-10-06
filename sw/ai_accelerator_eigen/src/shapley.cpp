@@ -91,7 +91,7 @@ int generate_random(int min, int max) {
 }
 
 float generate_random_float(float min, float max) {
-	return min + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(max-min)));
+	return min + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX)/(max-min));
 }
 
 
