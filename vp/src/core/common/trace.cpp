@@ -97,9 +97,12 @@ void InstructionNodeR::insert_rb(
 		}
 	}
 	
-
+	
 	std::bitset<INSTRUCTION_TREE_DEPTH> anti_dependencies;
 	std::bitset<INSTRUCTION_TREE_DEPTH> output_dependencies;
+	
+	//std::bitset<INSTRUCTION_TREE_DEPTH> memory_anti_dependencies;
+	//std::bitset<INSTRUCTION_TREE_DEPTH> memory_output_dependencies;
 
 	#ifdef debug_dependencies
 	printf("---------------\nChecking dependencies\n---------------\n");
@@ -123,9 +126,9 @@ void InstructionNodeR::insert_rb(
 		int8_t tmp_true_dependency1 = -1;
 		int8_t tmp_true_dependency2 = -1;
 
-		int8_t memory_true_dependency = -1;
-		int8_t memory_output_dependency = -1;
-		int8_t memory_anti_dependency = -1;
+		[[maybe_unused]] int8_t memory_true_dependency = -1;
+		[[maybe_unused]] int8_t memory_output_dependency = -1;
+		[[maybe_unused]] int8_t memory_anti_dependency = -1;
 
 		uint64_t l_read; 
 		uint64_t l_store;
@@ -138,6 +141,8 @@ void InstructionNodeR::insert_rb(
 
 		anti_dependencies.reset();
 		output_dependencies.reset();
+		//memory_anti_dependencies.reset();
+		//memory_output_dependencies.reset();
 
 		//calculate true register dependencies
 		if(register_dependencies_true[rs1] > -1){ //maybe use >0 as instruction don't depend on zero reg
@@ -153,7 +158,7 @@ void InstructionNodeR::insert_rb(
 				tmp_true_dependency2 = i - register_dependencies_true[rs2];
 			}
 		}else{
-			tmp_input1 = rs2;
+			tmp_input2 = rs2;
 		}
 		//int8_t true_dependency3 = -1; //TODO support R4 Fused Multiply Instructions
 
@@ -194,6 +199,8 @@ void InstructionNodeR::insert_rb(
 		case Type::I :
 			/* rs1, rd */
 			tmp_true_dependency2 = -1; //reset as rs2 is not used (unknown value in variable)
+			rs2 = -1;
+			tmp_input2 = -1;
 			register_dependencies_true[rd] = i;
 			register_dependencies_output[rd].set(i, true);
 			tmp_output = rd;
@@ -303,6 +310,10 @@ void InstructionNodeR::insert_rb(
 			/* rd */
 			tmp_true_dependency1 = -1;
 			tmp_true_dependency2 = -1;
+			rs1 = -1;
+			rs2 = -1;
+			tmp_input1 = -1;
+			tmp_input2 = -1;
 			register_dependencies_true[rd] = i;
 			register_dependencies_output[rd].set(i, true);
 			tmp_output = rd;
@@ -316,6 +327,10 @@ void InstructionNodeR::insert_rb(
 			/* rd */
 			tmp_true_dependency1 = -1;
 			tmp_true_dependency2 = -1;
+			rs1 = -1;
+			rs2 = -1;
+			tmp_input1 = -1;
+			tmp_input2 = -1;
 			register_dependencies_true[rd] = i;
 			register_dependencies_output[rd].set(i, true);
 			tmp_output = rd;
@@ -371,6 +386,14 @@ void InstructionNodeR::insert_rb(
 		// }
 		#endif
 	
+		AccessType access_type = current_step->last_memory_access_type;
+		uint64_t last_memory_access = -1;
+			if(access_type==AccessType::STORE){
+				last_memory_access = current_step->last_memory_written;
+			}
+			if (access_type==AccessType::LOAD){
+				last_memory_access = current_step->last_memory_read;
+		}			
 		if(i>0){//the root node already exists and is current_node
 			current_node = current_node->insert({				
 									current_step->last_executed_instruction, 
@@ -378,18 +401,31 @@ void InstructionNodeR::insert_rb(
 									tmp_true_dependency1, tmp_true_dependency2,
 									output_dependencies,
 									anti_dependencies,
+									rs1, rs2, rd, 
 									tmp_input1, tmp_input2, tmp_output, 
 									i, 
 									current_step->last_step_id, 
-									current_step->last_cycles
+									current_step->last_cycles, 
+									last_memory_access,
+									access_type,
+									current_step->last_stack_pointer,
+									current_step->last_frame_pointer,
+									current_step->last_parameter
 									});
 			// inserted_nodes[i] = current_node;
 		}else{
 			update_weight({-1, -1, 0, 0, //the root node does not have any dependencies
+			rs1,rs2,rd,
 			tmp_input1, tmp_input2, tmp_output,
-			0, //depth is 0 as this is the root node
+			current_step->last_executed_pc,
 			current_step->last_step_id, 
-			current_step->last_cycles});
+			current_step->last_cycles, 
+			last_memory_access,
+			access_type,
+			current_step->last_stack_pointer,
+			current_step->last_frame_pointer,
+			current_step->last_parameter
+			}, 0); //depth is 0 as this is the root node
 		}
 	}
 
@@ -472,13 +508,21 @@ InstructionNode* InstructionNodeR::insert(const StepInsertInfo& p){
 								p.true_dependency2,
 								p.output_dependencies,
 								p.anti_dependencies,
+								p.rs1,
+								p.rs2,
+								p.rd,
 								p.input1,
 								p.input2,
 								p.output,
 								p.pc,
 								p.step,
-								p.cycles
-							});
+								p.cycles,
+								p.memory_address,
+								p.access_type,
+								p.stack_pointer,
+								p.frame_pointer,
+								p.parameter
+							}, p.depth);
 
 	return found_child;
 }
@@ -812,7 +856,7 @@ Path InstructionNodeR::extend_path(const PathExtensionParams& p){
 		if(max_child_path.length==0){ //should not happen with force_extension
 			max_child_path = child_path;
 		}else{
-			if(p.force_extension_depth+1 == p.length && p.force_instruction == child->instruction){
+			if(static_cast<uint32_t>(p.force_extension_depth+1) == p.length && p.force_instruction == child->instruction){
 				//force_extension is -1 if not forcing extension
 				//if instruction == child->instruction
 				//set child_path as new max_child without checking score and break
@@ -828,7 +872,7 @@ Path InstructionNodeR::extend_path(const PathExtensionParams& p){
 
 	if (max_child_path.length>0)
 	{
-		if((max_path.get_score(p.score_function) < max_child_path.get_score(p.score_function)) || p.force_extension_depth+1==p.length){
+		if((max_path.get_score(p.score_function) < max_child_path.get_score(p.score_function)) || static_cast<uint32_t>(p.force_extension_depth+1)==p.length){
 			max_path.length = max_child_path.length;
 			max_path.minimum_weight = max_child_path.minimum_weight;
 			max_path.opcodes.insert(max_path.opcodes.end(), 
@@ -1096,8 +1140,8 @@ std::stringstream InstructionNodeLeaf::to_dot(const char* tree_op_name, const ch
 		return name;
 }
 
-void InstructionNodeLeaf::update_weight(const StepUpdateInfo& p){
-		InstructionNode::update_weight(p);
+void InstructionNodeLeaf::update_weight(const StepUpdateInfo& p, uint32_t depth){
+		InstructionNode::update_weight(p, depth);
 		pc_map[p.pc]++; //if key does not exist, it is created with value 0 
 	}
 
@@ -1113,37 +1157,33 @@ nlohmann::ordered_json InstructionNodeLeaf::to_json(){
 MemoryNode::MemoryNode(bool is_store_instruction) : is_store(is_store_instruction){
 }
 
-void MemoryNode::register_access(uint64_t address, 
-				uint64_t prev_writer, uint64_t prev_reader, 
+void MemoryNode::register_access(uint64_t pc, uint64_t address, 
+	AccessType access_type, uint64_t prev_access, 
 				uint64_t stackpointer, uint64_t framepointer){
-	memory_accesses[address]++;
 	uint64_t access_offset = abs((long int)(address-last_access));
 	access_offset_sum += access_offset;
 	int64_t accessor_diff = 0; 
-	if(is_store){
-		accessor_diff = prev_writer - last_access;
-	}else{
-		accessor_diff = prev_reader -last_access;
-	}
+	accessor_diff = prev_access - last_access;
 
+	Opcode::MemoryRegion memory_location = Opcode::MemoryRegion::NONE;
 	if(framepointer>0 && address <= framepointer && address >= stackpointer){
 		//address is in Frame
 		memory_location = memory_location | MemoryRegion::FRAME;
-		printf("FRAME Access %lx\n",address);
 	}else{
 		if(address<stackpointer){
 			//address is not on the Stack
 			memory_location = memory_location | MemoryRegion::HEAP;
-			printf("HEAP Access %lx\n",address);
+			//printf("HEAP Access %lx\n",address);
 		}else{
 			//address is on the Stack but not in Frame
 			memory_location = memory_location | MemoryRegion::STACK;
-			printf("STACK Access %lx\n",address);
+			//printf("STACK Access %lx\n",address);
 		}
 	}
-
-	printf("Register access: %lx (%lx | %lx) offset: %ld, diff: %ld", address, prev_writer, prev_reader, access_offset, accessor_diff);
-}	
+	// Use unordered_map for O(1) lookup/insert
+	auto& access_entry = memory_accesses[pc];
+	access_entry[address] = memory_location;
+}
 
 InstructionNodeMemory::InstructionNodeMemory(Opcode::Mapping instruction, uint64_t parent_hash, uint64_t memory_access, bool is_store_instruction)
 			: InstructionNode(instruction, parent_hash), 
@@ -1206,12 +1246,18 @@ std::stringstream InstructionNodeMemory::to_dot(const char* tree_op_name, const 
 		<< "<TR><TD><FONT COLOR=\"0.6 0.6 1.000\" POINT-SIZE=\"10\">" 
 		<< std::hex << subtree_hash << std::dec 
 		<< "</FONT></TD></TR>"
-		<< "<TR><TD><FONT COLOR=\"0.2 0.8 1.000\" POINT-SIZE=\"10\">" 
-		<< (int)memory_location << ": ";
+		<< "<TR><TD><FONT COLOR=\"0.2 0.8 1.000\" POINT-SIZE=\"10\">";
+		//<< (int)memory_location << ": ";
+		dot_stream << "[";
 		for (auto &&i : this->memory_accesses)
 		{
-			dot_stream << "[" << i.first << "x : " << std::hex << (i.second & 0xFFFF) << "]" << std::dec;
+			dot_stream << std::hex << i.first << ": {";
+			for(auto &&pair : i.second){
+				dot_stream << "(" << std::hex << (pair.first & 0xFFFF) << " - " << std::hex << (int)pair.second << "), ";
+			}
+			dot_stream << std::hex << i.first << "}" << std::dec;
 		}
+		dot_stream << std::dec << "]";
 		dot_stream 
 		<< "</FONT></TD></TR></TABLE>" 
 		<< ">, color=" 
@@ -1257,6 +1303,11 @@ std::stringstream InstructionNodeMemory::to_dot(const char* tree_op_name, const 
 	return name;
 }
 
+void InstructionNodeMemory::update_weight(const StepUpdateInfo& p, uint32_t depth){
+	InstructionNode::update_weight(p, depth);
+	register_access(p.pc, p.memory_address, p.access_type, 0, p.stack_pointer, p.frame_pointer);
+}
+
 InstructionNodeMemoryLeaf::InstructionNodeMemoryLeaf(Mapping instruction, uint64_t parent_hash, uint64_t pc, 
 			uint64_t memory_access, bool is_store_instruction)
 			: InstructionNode(instruction, parent_hash), 
@@ -1266,6 +1317,12 @@ InstructionNodeMemoryLeaf::InstructionNodeMemoryLeaf(Mapping instruction, uint64
 
 void InstructionNodeMemoryLeaf::_print(uint8_t level){
 	printf("Not implemented");
+}
+
+void InstructionNodeMemoryLeaf::update_weight(const StepUpdateInfo& p, uint32_t depth){
+	InstructionNode::update_weight(p, depth);
+	register_access(p.pc, p.memory_address, p.access_type, 0, p.stack_pointer, p.frame_pointer);
+	pc_map[p.pc]++;
 }
 
 std::stringstream InstructionNodeMemoryLeaf::to_dot(const char* tree_op_name, const char* parent_name,
@@ -1293,8 +1350,18 @@ std::stringstream InstructionNodeMemoryLeaf::to_dot(const char* tree_op_name, co
 			<< "<TR><TD><FONT COLOR=\"0.6 0.6 1.000\" POINT-SIZE=\"10\">" 
 			<< std::hex << subtree_hash << std::dec 
 			<< "</FONT></TD></TR>"
-			<< "<TR><TD><FONT COLOR=\"0.2 0.8 1.000\" POINT-SIZE=\"10\">" 
-			<< (int)memory_location
+			<< "<TR><TD><FONT COLOR=\"0.2 0.8 1.000\" POINT-SIZE=\"10\">";
+			dot_stream << "[";
+			for (auto &&i : this->memory_accesses)
+			{
+				dot_stream << std::hex << i.first << ": {";
+				for(auto &&pair : i.second){
+					dot_stream << "(" << std::hex << (pair.first & 0xFFFF) << " - " << std::hex << (int)pair.second << "), ";
+				}
+				dot_stream << std::hex << i.first << "}" << std::dec;
+			}
+			dot_stream << std::dec << "]" 
+
 			<< "</FONT></TD></TR>"  
 
 			<< "<TR><TD><FONT COLOR=\"0.6 0.4 0.600\" POINT-SIZE=\"10\">" << std::hex;
