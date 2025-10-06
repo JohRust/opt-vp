@@ -166,6 +166,7 @@ void ISS::exec_step() {
 
 	uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
 
+	if (record_traces) {
 //Instead of updateing the entry at the start of the loop with data from the last iteration
 //move this part to the end as memory accesses have to be calculated first
 //otherwise memory accesses are off by 1
@@ -260,6 +261,7 @@ void ISS::exec_step() {
 			default:;
 		}
 		puts("");
+	}
 	}
 
 		//printf("OP: %s\n", Opcode::mappingStr[op]);
