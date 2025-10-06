@@ -155,6 +155,15 @@ void ISS::exec_step() {
 		pc += 4;
 	}
 
+	if (csrs.instret.reg % 1000000 == 0 && csrs.instret.reg > 0) {
+		printf("[Progress] Executed %u instructions. Last 5 steps:\n", csrs.instret.reg);
+		for (int i = 0; i < 5; ++i) {
+			int idx = (ring_buffer_index + INSTRUCTION_TREE_DEPTH - i) % INSTRUCTION_TREE_DEPTH;
+			auto &step = last_executed_steps[idx];
+			printf("  PC: 0x%08x, Opcode: %s\n", step.last_executed_pc, Opcode::mappingStr[step.last_executed_instruction]);
+		}
+	}
+
 	uint64_t cycles_diff = _compute_and_get_current_cycles() - prev_cycles;
 
 	if (record_traces) {
@@ -267,7 +276,10 @@ void ISS::exec_step() {
 	}
 	}
 
-		//printf("[%x] OP: %s\n", last_pc, Opcode::mappingStr[op]);
+		//printf("OP: %s\n", Opcode::mappingStr[op]);
+	#ifdef trace_parameter
+	int32_t last_parameter = -1;
+	#endif
 
 	switch (op) {
 		case Opcode::UNDEF:
@@ -309,9 +321,15 @@ void ISS::exec_step() {
 			regs[instr.rd()] = regs[instr.rs1()] - regs[instr.rs2()];
 			break;
 
-		case Opcode::SLL:
-			regs[instr.rd()] = regs[instr.rs1()] << regs.shamt(instr.rs2());
+		case Opcode::SLL: {
+			auto shift_amount = regs.shamt(instr.rs2());
+			regs[instr.rd()] = regs[instr.rs1()] << shift_amount;
+			
+			#ifdef trace_parameter
+			last_parameter = shift_amount;
+			#endif
 			break;
+		}
 
 		case Opcode::SLT:
 			regs[instr.rd()] = regs[instr.rs1()] < regs[instr.rs2()];
@@ -321,13 +339,25 @@ void ISS::exec_step() {
 			regs[instr.rd()] = ((uint32_t)regs[instr.rs1()]) < ((uint32_t)regs[instr.rs2()]);
 			break;
 
-		case Opcode::SRL:
-			regs[instr.rd()] = ((uint32_t)regs[instr.rs1()]) >> regs.shamt(instr.rs2());
-			break;
+		case Opcode::SRL: {
+			auto shift_amount = regs.shamt(instr.rs2());
+			regs[instr.rd()] = ((uint32_t)regs[instr.rs1()]) >> shift_amount;
 
-		case Opcode::SRA:
-			regs[instr.rd()] = regs[instr.rs1()] >> regs.shamt(instr.rs2());
+			#ifdef trace_parameter
+			last_parameter = shift_amount;
+			#endif
 			break;
+		}
+
+		case Opcode::SRA: {
+			auto shift_amount = regs.shamt(instr.rs2());
+			regs[instr.rd()] = regs[instr.rs1()] >> shift_amount;
+
+			#ifdef trace_parameter
+			last_parameter = shift_amount;
+			#endif
+			break;
+		}
 
 		case Opcode::XOR:
 			regs[instr.rd()] = regs[instr.rs1()] ^ regs[instr.rs2()];
@@ -343,14 +373,23 @@ void ISS::exec_step() {
 
 		case Opcode::SLLI:
 			regs[instr.rd()] = regs[instr.rs1()] << instr.shamt();
+			#ifdef trace_parameter
+			last_parameter = instr.shamt();
+			#endif
 			break;
 
 		case Opcode::SRLI:
 			regs[instr.rd()] = ((uint32_t)regs[instr.rs1()]) >> instr.shamt();
+			#ifdef trace_parameter
+			last_parameter = instr.shamt();
+			#endif
 			break;
 
 		case Opcode::SRAI:
 			regs[instr.rd()] = regs[instr.rs1()] >> instr.shamt();
+			#ifdef trace_parameter
+			last_parameter = instr.shamt();
+			#endif
 			break;
 
 		case Opcode::LUI:
@@ -1319,6 +1358,7 @@ void ISS::exec_step() {
 		last_executed_steps[ring_buffer_index].last_step_id = total_num_instr;
 		last_executed_steps[ring_buffer_index].last_stack_pointer = regs[RegFile::sp];
 		last_executed_steps[ring_buffer_index].last_frame_pointer = regs[RegFile::fp];
+		last_executed_steps[ring_buffer_index].last_parameter = last_parameter;
 
 		last_executed_steps[ring_buffer_index].last_memory_access_type = std::get<1>(last_memory_access);
 		if(std::get<1>(last_memory_access)==AccessType::STORE){//check if memory was accessed in the last execution step
@@ -2139,7 +2179,7 @@ LoadedLibrary load_scoring_functions(const std::string& libraryPath){
 void analyze_trees(std::array<ScoreFunction, SF_BATCH_SIZE> score_functions, std::list<InstructionNodeR> instruction_trees){
 	std::vector<std::vector<Path>> best_sequences_for_sf; 
 	uint32_t score_function_index = 0;
-	for (auto &&score_function : score_functions)
+	for ([[maybe_unused]] auto &&score_function : score_functions)
 	{
 		std::vector<Path> tmp_best_sequences; 
 		auto _sf = score_functions[score_function_index];
@@ -2161,7 +2201,7 @@ void analyze_trees(std::array<ScoreFunction, SF_BATCH_SIZE> score_functions, std
 	for (auto &&sequences : best_sequences_for_sf)
 	{
 		printf("\nBest sequences for score function %d:\n", sf_index);
-		for (size_t i = 0; i < std::min(3, (int)sequences.size()); i++) //print the best 3 sequences for each score function
+		for (size_t i = 0; i < std::min(static_cast<size_t>(3), sequences.size()); i++) //print the best 3 sequences for each score function
 		{
 			sequences[i].show();
 		}
@@ -2494,8 +2534,8 @@ void ISS::show() {
 	printf("start analysis\n");
 	std::vector<Path> tmp_discovered_sub_sequences; 
 	auto sf = [](ScoreParams p) -> float {
-		float score = (p.length * p.weight) * p.score_multiplier 
-			+ p.weight * p.score_bonus; //length * minimum_weight;
+		float score = (p.length * p.weight);// * p.score_multiplier //TODO update to use true weight instead
+			//+ p.weight * p.score_bonus; //length * minimum_weight;
 		return score;
 	};
 	for (InstructionNodeR& tree : instruction_trees){
@@ -2517,6 +2557,28 @@ void ISS::show() {
 	std::vector<std::vector<BranchingPoint>> discovered_variant_starting_points;
 	std::vector<std::vector<std::vector<PathNode>>> discovered_sub_sequences_node_lists;
 	std::vector<std::vector<std::vector<PathNode>>> discovered_variant_sequences_node_lists;
+
+	std::string file_path = std::string(input_filename);
+	std::string application_name = file_path.substr(file_path.find_last_of("/\\")+1);
+	std::string csv_stats = "";
+	csv_stats = output_filename + 
+								std::string("Stats10_") + 
+								application_name + 
+								std::string(".csv");
+
+	// Write CSV header once, before the loop
+	#ifdef output_stats
+	{
+		std::ofstream csv_out(csv_stats, std::ios::app);
+		csv_out.seekp(0, std::ios::end);
+		if (csv_out.tellp() == 0) {
+			csv_out << "Opcodes;Length;Weight;Score;Hash\n";
+		}else{
+			csv_out.seekp(0, std::ios::end); // Move to the end of the file
+			csv_out << "\n"; // Add a newline to separate from previous content
+		}
+	}
+	#endif
 
 	printf("\n -----------------\n| Best Sequences |\n -----------------\n");
 	for (auto &&p : discovered_sequences)
@@ -2568,6 +2630,16 @@ void ISS::show() {
 		printf("-------------------------------------------\n");
 		//print discovered sequences
 		p.show();	
+		// printf("Stats:\n");
+		// p.to_csv_stats();
+		//print stats of sequence to file as csv
+
+		{
+			std::ofstream csv_out(csv_stats, std::ios::app);
+			#ifdef output_stats
+			p.to_csv_stats(csv_out);
+			#endif
+		}
 
 		tmp_discovered_sub_sequences = p.end_of_sequence->force_path_extension(p, sf);
 		
@@ -2607,6 +2679,13 @@ void ISS::show() {
 		#endif
 	}
 
+	{
+		#ifdef output_stats
+		std::ofstream csv_out(csv_stats, std::ios::app);
+		csv_out << csrs.instret.reg << ";" "\n";
+		#endif
+	}
+	
 	if(output_as_json){
 		output_json(cout_save, discovered_sequences_node_list, 
 			discovered_sub_sequences_node_lists, 

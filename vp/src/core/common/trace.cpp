@@ -145,9 +145,9 @@ void InstructionNodeR::insert_rb(
 		int8_t tmp_true_dependency1 = -1;
 		int8_t tmp_true_dependency2 = -1;
 
-		int8_t memory_true_dependency = -1;
-		int8_t memory_output_dependency = -1;
-		int8_t memory_anti_dependency = -1;
+		[[maybe_unused]] int8_t memory_true_dependency = -1;
+		[[maybe_unused]] int8_t memory_output_dependency = -1;
+		[[maybe_unused]] int8_t memory_anti_dependency = -1;
 
 		uint64_t l_read; 
 		uint64_t l_store;
@@ -429,21 +429,23 @@ void InstructionNodeR::insert_rb(
 									last_memory_access,
 									access_type,
 									current_step->last_stack_pointer,
-									current_step->last_frame_pointer
+									current_step->last_frame_pointer,
+									current_step->last_parameter
 									});
 			// inserted_nodes[i] = current_node;
 		}else{
 			update_weight({-1, -1, 0, 0, //the root node does not have any dependencies
 			rs1,rs2,rd,
 			tmp_input1, tmp_input2, tmp_output,
-			0, //depth is 0 as this is the root node
+			current_step->last_executed_pc,
 			current_step->last_step_id, 
 			current_step->last_cycles, 
 			last_memory_access,
 			access_type,
 			current_step->last_stack_pointer,
-			current_step->last_frame_pointer
-			});
+			current_step->last_frame_pointer,
+			current_step->last_parameter
+			}, 0); //depth is 0 as this is the root node
 		}
 	#endif
 	#ifdef single_trace_mode
@@ -607,8 +609,9 @@ InstructionNodeR* InstructionNodeR::insert(const StepInsertInfo& p){
 								p.memory_address,
 								p.access_type,
 								p.stack_pointer,
-								p.frame_pointer
-							});
+								p.frame_pointer,
+								p.parameter
+							}, p.depth);
 
 	return found_child;
 }
@@ -961,7 +964,7 @@ Path InstructionNodeR::extend_path(const PathExtensionParams& p){
 		if(max_child_path.length==0){ //should not happen with force_extension
 			max_child_path = child_path;
 		}else{
-			if(p.force_extension_depth+1 == p.length && p.force_instruction == child->instruction){
+			if(static_cast<uint32_t>(p.force_extension_depth+1) == p.length && p.force_instruction == child->instruction){
 				//force_extension is -1 if not forcing extension
 				//if instruction == child->instruction
 				//set child_path as new max_child without checking score and break
@@ -977,7 +980,7 @@ Path InstructionNodeR::extend_path(const PathExtensionParams& p){
 
 	if (max_child_path.length>0)
 	{
-		if((max_path.get_score(p.score_function) < max_child_path.get_score(p.score_function)) || p.force_extension_depth+1==p.length){
+		if((max_path.get_score(p.score_function) < max_child_path.get_score(p.score_function)) || static_cast<uint32_t>(p.force_extension_depth+1)==p.length){
 			max_path.length = max_child_path.length;
 			max_path.minimum_weight = max_child_path.minimum_weight;
 			max_path.opcodes.insert(max_path.opcodes.end(), 
@@ -1244,8 +1247,8 @@ std::stringstream InstructionNodeLeaf::to_dot(const char* tree_op_name, const ch
 		return name;
 }
 
-void InstructionNodeLeaf::update_weight(const StepUpdateInfo& p){
-		InstructionNode::update_weight(p);
+void InstructionNodeLeaf::update_weight(const StepUpdateInfo& p, uint32_t depth){
+		InstructionNode::update_weight(p, depth);
 		pc_map[p.pc]++; //if key does not exist, it is created with value 0 
 	}
 
@@ -1264,17 +1267,15 @@ MemoryNode::MemoryNode(bool is_store_instruction) : is_store(is_store_instructio
 void MemoryNode::register_access(uint64_t pc, uint64_t address, 
 	AccessType access_type, uint64_t prev_access, 
 				uint64_t stackpointer, uint64_t framepointer){
-					uint64_t access_offset = abs((long int)(address-last_access));
-					access_offset_sum += access_offset;
-					int64_t accessor_diff = 0; 
+	uint64_t access_offset = abs((long int)(address-last_access));
+	access_offset_sum += access_offset;
+	int64_t accessor_diff = 0; 
+	accessor_diff = prev_access - last_access;
 
-		accessor_diff = prev_access - last_access;
-	
 	Opcode::MemoryRegion memory_location = Opcode::MemoryRegion::NONE;
 	if(framepointer>0 && address <= framepointer && address >= stackpointer){
 		//address is in Frame
 		memory_location = memory_location | MemoryRegion::FRAME;
-		//printf("FRAME Access %lx\n",address);
 	}else{
 		if(address<stackpointer){
 			//address is not on the Stack
@@ -1286,21 +1287,10 @@ void MemoryNode::register_access(uint64_t pc, uint64_t address,
 			//printf("STACK Access %lx\n",address);
 		}
 	}
-	auto& access_entry = memory_accesses[pc]; //If the entry does not exist, it is created
-	// Check if a pair with memory_location is already in the set
-	bool found = false;
-	for (const auto& entry : access_entry) {
-		if (static_cast<Opcode::MemoryRegion>(entry.first) == memory_location) {
-			found = true;
-			break;
-		}
-	}
-
-	// Add the pair (memory_location, memory_location) to the set if not already contained
-	if (!found) {
-		access_entry.insert({address, memory_location});
-	}
-}	
+	// Use unordered_map for O(1) lookup/insert
+	auto& access_entry = memory_accesses[pc];
+	access_entry[address] = memory_location;
+}
 
 InstructionNodeMemory::InstructionNodeMemory(Opcode::Mapping instruction, uint64_t parent_hash, uint64_t memory_access, bool is_store_instruction)
 			: InstructionNode(instruction, parent_hash), 
@@ -1420,8 +1410,8 @@ std::stringstream InstructionNodeMemory::to_dot(const char* tree_op_name, const 
 	return name;
 }
 
-void InstructionNodeMemory::update_weight(const StepUpdateInfo& p){
-	InstructionNode::update_weight(p);
+void InstructionNodeMemory::update_weight(const StepUpdateInfo& p, uint32_t depth){
+	InstructionNode::update_weight(p, depth);
 	register_access(p.pc, p.memory_address, p.access_type, 0, p.stack_pointer, p.frame_pointer);
 }
 
@@ -1436,8 +1426,8 @@ void InstructionNodeMemoryLeaf::_print(uint8_t level){
 	printf("Not implemented");
 }
 
-void InstructionNodeMemoryLeaf::update_weight(const StepUpdateInfo& p){
-	InstructionNode::update_weight(p);
+void InstructionNodeMemoryLeaf::update_weight(const StepUpdateInfo& p, uint32_t depth){
+	InstructionNode::update_weight(p, depth);
 	register_access(p.pc, p.memory_address, p.access_type, 0, p.stack_pointer, p.frame_pointer);
 	pc_map[p.pc]++;
 }
