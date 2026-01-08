@@ -16,11 +16,11 @@ extern "C" {
 // Otherwise linking fails.
 void *__dso_handle = 0;
 
-#define N_FEATURES 5
+#define N_FEATURES 4
 #define HIDDEN_SIZE 2
 
-#define EXACT_SHAP 0
-#define EXPECTED_GRAD 1
+#define EXACT_SHAP 1
+#define EXPECTED_GRAD 0
 
 int main(int argc, char **argv) {
 	init_dma();
@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
 	nn::Sequential model;
 	nn::Linear *linear = new nn::Linear(N_FEATURES, HIDDEN_SIZE);
 	Eigen::MatrixXi weights(HIDDEN_SIZE, N_FEATURES);
-	weights << 1, 2, 3, 4, 5,
-			   1, 2, 3, 4, 5;
+	weights << 1, 2, 3, 4,
+			   1, 2, 3, 4;
 	linear->setWeights(weights);
 	linear->setBiases(Eigen::VectorXi::Zero(HIDDEN_SIZE));
 	model.addLayer(linear);
@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
 	model.addLayer(linear2);
 
 	// Create random input data matrix of size 1x4 with values between 0 and 10
-	//Eigen::MatrixXi input_data = (Eigen::MatrixXi(1, 4) << 1, 2, 3, 4).finished();
-	Eigen::MatrixXi input_data = Eigen::MatrixXi::Random(1, N_FEATURES) * 10;
+	Eigen::MatrixXi input_data = (Eigen::MatrixXi(1, 4) << 1, 2, 3, 4).finished();
+	//Eigen::MatrixXi input_data = Eigen::MatrixXi::Random(1, N_FEATURES) * 10;
 	Eigen::MatrixXi background_data = Eigen::MatrixXi::Zero(1, N_FEATURES);
 	std::stringstream ss;
 	

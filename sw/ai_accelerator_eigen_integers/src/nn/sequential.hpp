@@ -49,9 +49,9 @@ namespace nn
          * @param input The input tensor to the model.
          * @return The output tensor after the forward pass.
          */
-        Eigen::MatrixXf forward(const Eigen::MatrixXf& input) override
+        Eigen::MatrixXi forward(const Eigen::MatrixXi& input) override
         {
-            Eigen::MatrixXf output = input;
+            Eigen::MatrixXi output = input;
             for (auto layer : layers)
             {
                 output = layer->forward(output);
@@ -66,9 +66,9 @@ namespace nn
          * @param gradOutput The gradient of the loss function with respect to the model's output.
          * @return The gradient of the loss function with respect to the model's input.
          */
-        Eigen::MatrixXf backward(const Eigen::MatrixXf& gradOutput) override
+        Eigen::MatrixXi backward(const Eigen::MatrixXi& gradOutput) override
         {
-            Eigen::MatrixXf gradInput = gradOutput;
+            Eigen::MatrixXi gradInput = gradOutput;
             for (int i = layers.size() - 1; i >= 0; i--)
             {
                 gradInput = layers[i]->backward(gradInput);

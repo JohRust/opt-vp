@@ -6,23 +6,23 @@ using namespace Eigen;
 namespace nn {
 
 Linear::Linear(int inputSize, int outputSize)
-    : weights(Eigen::MatrixXf::Random(outputSize, inputSize)),
-      biases(Eigen::VectorXf::Random(outputSize)),
-      gradWeights(Eigen::MatrixXf::Zero(outputSize, inputSize)),
-      gradBiases(Eigen::VectorXf::Zero(outputSize)) {
+    : weights(Eigen::MatrixXi::Random(outputSize, inputSize)),
+      biases(Eigen::VectorXi::Random(outputSize)),
+      gradWeights(Eigen::MatrixXi::Zero(outputSize, inputSize)),
+      gradBiases(Eigen::VectorXi::Zero(outputSize)) {
 }
 
-Eigen::MatrixXf Linear::forward(const Eigen::MatrixXf& input) {
+Eigen::MatrixXi Linear::forward(const Eigen::MatrixXi& input) {
     this->input = input;
-    Eigen::MatrixXf temp = input * weights.transpose();
+    Eigen::MatrixXi temp = input * weights.transpose();
     temp.rowwise() += biases.transpose();
     return temp;
 }
 
-Eigen::MatrixXf Linear::backward(const Eigen::MatrixXf& gradOutput) {
-    Eigen::MatrixXf gradInput = gradOutput * weights; // gradInput = (batch_size, output_size) * (output_size, input_size) = (batch_size, input_size)
-    Eigen::MatrixXf gradWeights = gradOutput.transpose() * input; // gradWeights = (batch_size, output_size)^T * (batch_size, input_size) = (output_size, input_size)
-    Eigen::MatrixXf gradBiases = gradOutput.transpose().rowwise().sum(); // gradBiases = sum over rows of (batch_size, output_size)^T = (output_size)
+Eigen::MatrixXi Linear::backward(const Eigen::MatrixXi& gradOutput) {
+    Eigen::MatrixXi gradInput = gradOutput * weights; // gradInput = (batch_size, output_size) * (output_size, input_size) = (batch_size, input_size)
+    Eigen::MatrixXi gradWeights = gradOutput.transpose() * input; // gradWeights = (batch_size, output_size)^T * (batch_size, input_size) = (output_size, input_size)
+    Eigen::MatrixXi gradBiases = gradOutput.transpose().rowwise().sum(); // gradBiases = sum over rows of (batch_size, output_size)^T = (output_size)
     #ifdef LIN_DEBUG
     std::cout << "--------" << std::endl;
     std::cout << "input:\n" << input.transpose() << std::endl;
@@ -39,15 +39,15 @@ Eigen::MatrixXf Linear::backward(const Eigen::MatrixXf& gradOutput) {
 }
 
 void Linear::update(double learningRate) {
-    this->weights += this->gradWeights * learningRate;
-    this->biases += this->gradBiases * learningRate;
+    this->weights += (this->gradWeights.cast<float>() * learningRate).cast<int>();
+    this->biases += (this->gradBiases.cast<float>() * learningRate).cast<int>();
 }
 
 std::string Linear::toString() {
    return "Linear (" + std::to_string(weights.rows()) + " -> " + std::to_string(weights.cols()) + ")";
 }
 
-void Linear::setWeights(const Eigen::MatrixXf& weights) {
+void Linear::setWeights(const Eigen::MatrixXi& weights) {
     if (weights.rows() != this->weights.rows() || weights.cols() != this->weights.cols()) {
         std::cerr << "Invalid shape for weights, needs " << this->weights.rows() << "x" << this->weights.cols() << std::endl;
         exit(1);
@@ -55,7 +55,7 @@ void Linear::setWeights(const Eigen::MatrixXf& weights) {
     this->weights = weights;
 }
 
-void Linear::setBiases(const Eigen::VectorXf& biases) {
+void Linear::setBiases(const Eigen::VectorXi& biases) {
     if (biases.rows() != this->biases.rows()) {
         std::cerr << "Invalid shape for biases, needs " << this->biases.rows() << "x1" << std::endl;
         exit(1);
