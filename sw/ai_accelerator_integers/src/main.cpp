@@ -13,6 +13,10 @@ extern "C" {
 #include "nn/sequential.hpp"
 
 #define NUM_TYPE int16_t
+
+#define EXACT_SHAP 1
+#define EXPECTED_GRAD 0
+
 // #define NUM_TYPE float
 
 // We need to tell the C++ runtime that we don't have dynamic shared objects.
@@ -38,12 +42,20 @@ int main(int argc, char **argv) {
 
 	Tensor<NUM_TYPE> input_data = Tensor<NUM_TYPE>({1, 2, 3, 4}, {1, 4}) * QUANT_SCALE;
 	Tensor<NUM_TYPE> background_data = Tensor<NUM_TYPE>({0, 0, 0, 0}, {1, 4}) * QUANT_SCALE;
+
+	#if EXPECTED_GRAD
+	START_TRACE;
 	Tensor<NUM_TYPE> shapley_values = expected_gradients<NUM_TYPE>(model, input_data, background_data, 50) / QUANT_SCALE;
+	STOP_TRACE;
+	printf("Expected gradients Shapley values:\n%s\n", shapley_values.toString().c_str());
+	#endif
+	
+	#if EXACT_SHAP
+	START_TRACE;
 	Tensor<NUM_TYPE> shapley_values_exact = exact_shap<NUM_TYPE>(model, input_data, background_data) / QUANT_SCALE;
-	printf("Shapley values:\n");
-	printf("%s\n", shapley_values.toString().c_str());
-	printf("Exact Shapley values:\n");
-	printf("%s\n", shapley_values_exact.toString().c_str());
+	STOP_TRACE;
+	printf("Exact Shapley values:\n%s\n", shapley_values_exact.toString().c_str());
+	#endif
 
 	Tensor<NUM_TYPE> preds = model.forward(input_data) / QUANT_SCALE;
 	printf("Predictions: %s\n", preds.toString().c_str());

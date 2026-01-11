@@ -8,7 +8,7 @@ do
     else
         export TARGET_ABI=ilp32
     fi
-    for o in -O0 -O1 -O3
+    for o in -O0 -O1 -O2 -O3
     do
         export OPTIMIZATION=$o
         make clean && make -j7

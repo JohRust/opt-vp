@@ -12,6 +12,9 @@ extern "C" {
 #include "nn/linear.hpp"
 #include "nn/sequential.hpp"
 
+#define EXACT_SHAP 1
+#define EXPECTED_GRAD 0
+
 // We need to tell the C++ runtime that we don't have dynamic shared objects.
 // Otherwise linking fails.
 void *__dso_handle = 0;
@@ -33,12 +36,20 @@ int main(int argc, char **argv) {
 
 	Tensor<float> input_data({1.0, 2.0, 3.0, 4.0}, {1, 4});
 	Tensor<float> background_data({0.0,0.0,0.0,0.0}, {1, 4});
+
+	#if EXPECTED_GRAD
+	START_TRACE;
 	Tensor<float> shapley_values = expected_gradients<float>(model, input_data, background_data, 50);
+	STOP_TRACE;
+	printf("Expected gradients Shapley values:\n%s\n", shapley_values.toString().c_str());
+	#endif
+
+	#if EXACT_SHAP
+	START_TRACE;
 	Tensor<float> shapley_values_exact = exact_shap<float>(model, input_data, background_data);
-	printf("Shapley values:\n");
-	printf("%s\n", shapley_values.toString().c_str());
-	printf("Exact Shapley values:\n");
-	printf("%s\n", shapley_values_exact.toString().c_str());
+	STOP_TRACE;
+	printf("Exact Shapley values:\n%s\n", shapley_values_exact.toString().c_str());
+	#endif
 
 	Tensor<float> preds = model.forward(input_data);
 	printf("Predictions: %s\n", preds.toString().c_str());
