@@ -186,6 +186,7 @@ struct ISS : public external_interrupt_target, public clint_interrupt_target, pu
 	PrivilegeLevel prv = MachineMode;
 	int64_t lr_sc_counter = 0;
 	uint64_t total_num_instr = 0;
+	uint64_t traced_num_instr = 0; // Like total_num_instr but only counting instructions executed while tracing is enabled
 
 	bool is_single_file = false;
 	bool output_as_dot = false;
