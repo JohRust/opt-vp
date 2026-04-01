@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
 	Eigen::MatrixXi weights(HIDDEN_SIZE, N_FEATURES);
 	weights << 1, 2, 3, 4,
 			   1, 2, 3, 4;
+	//weights = Eigen::MatrixXi::Random(HIDDEN_SIZE, N_FEATURES);
 	linear->setWeights(weights);
 	linear->setBiases(Eigen::VectorXi::Zero(HIDDEN_SIZE));
 	model.addLayer(linear);
